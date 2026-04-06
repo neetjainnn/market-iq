@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Market IQ - Upstox</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --purple:#7B2FC4;--purple-lt:#F3ECFB;--purple-bg:#F8F5FC;--purple-dk:#5A1E9E;
+  --green:#00C853;--green-lt:#E8F5E9;--red:#FF1744;--red-lt:#FFEBEE;
+  --orange:#FF6D00;--yellow:#FFD600;--blue:#2979FF;
+  --bg:#FFF;--bg2:#F5F5F7;--text1:#1A1A2E;--text2:#6B7280;--text3:#9CA3AF;
+  --border:#E5E7EB;--border-lt:#F0F0F0;
+}
+
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg2);color:var(--text1);max-width:430px;margin:0 auto;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ===== UPSTOX SHELL ===== */
+.ux-status{display:flex;justify-content:space-between;padding:8px 16px;font-size:12px;font-weight:600;background:var(--bg)}
+.ux-header{display:flex;align-items:center;gap:12px;padding:8px 16px 12px;background:var(--bg)}
+.ux-logo{width:32px;height:32px;background:var(--purple);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0}
+.ux-search{flex:1;background:var(--bg2);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3)}
+.ux-indices{display:flex;padding:0 16px 12px;gap:16px;background:var(--bg)}
+.idx-name{font-weight:600;color:var(--text2);font-size:11px}.idx-val{font-weight:700;font-size:12px}
+.idx-chg{font-size:11px}.idx-chg.dn{color:var(--red)}.idx-chg.up{color:var(--green)}
+.qa-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:16px;background:var(--bg)}
+.qa-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--text2);font-weight:500}
+.qa-ic{width:44px;height:44px;background:var(--purple-lt);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.chips{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;background:var(--bg)}.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--border);color:var(--text2)}
+.port{background:var(--bg);margin-top:8px;padding:16px}
+.port-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.port-hdr h3{font-size:14px;font-weight:600}.port-hdr a{font-size:13px;color:var(--purple);font-weight:600;text-decoration:none}
+.port-link{padding:10px 0;font-size:13px;color:var(--text2);font-weight:500;display:flex;justify-content:space-between;border-bottom:1px solid var(--border-lt)}
+
+/* ===== MIQ HOMEPAGE CARD ===== */
+.miq-card{background:var(--bg);margin-top:8px;padding:16px;cursor:pointer;transition:background .15s}
+.miq-card:active{background:var(--bg2)}
+.miq-card-row{display:flex;align-items:center;gap:12px}
+.miq-logo{width:44px;height:44px;background:linear-gradient(135deg,#7B2FC4,#A855F7);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:-.5px;flex-shrink:0}
+.miq-info{flex:1}
+.miq-info h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.streak-badge{font-size:12px;font-weight:700;color:var(--orange);background:#FFF3E0;padding:2px 8px;border-radius:10px;display:inline-flex;align-items:center;gap:3px}
+.miq-sub{font-size:12px;color:var(--text2);margin-top:3px;display:flex;align-items:center;gap:6px}
+.miq-sub .dot{width:4px;height:4px;background:var(--text3);border-radius:50%}
+.miq-sub .live{color:var(--green);font-weight:600}
+.miq-chevron{color:var(--text3);flex-shrink:0}
+
+.miq-done-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-lt)}
+.miq-done-row .timer-icon{width:32px;height:32px;background:var(--purple-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.miq-done-row .done-info{flex:1}
+.miq-done-row .done-info span{font-size:12px;color:var(--text2)}
+.miq-done-row .done-info strong{font-size:13px;display:block;margin-top:2px}
+.notify-btn{padding:6px 12px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+
+/* ===== VIEWS (show/hide, NOT overlay) ===== */
+.view{display:none}
+.view.active{display:block}
+
+.s-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-lt);background:var(--bg);position:sticky;top:0;z-index:10}
+.s-back{display:flex;align-items:center;gap:4px;background:none;border:none;font-family:inherit;font-size:15px;font-weight:700;color:var(--text1);cursor:pointer;padding:4px 0}
+.s-streak{display:flex;align-items:center;gap:4px;background:#FFF3E0;padding:4px 10px;border-radius:16px;font-size:13px;font-weight:700;color:var(--orange)}
+
+/* ===== QUIZ ===== */
+.quiz-timer-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 6px}
+.quiz-timer-bar span{font-size:12px;color:var(--text3);font-weight:500}
+.quiz-timer-bar strong{font-size:16px;font-weight:800}
+.quiz-timer-bar strong.warn{color:var(--red)}
+.quiz-progress{height:4px;background:var(--border-lt);margin:0 16px 16px;border-radius:2px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:var(--purple);border-radius:2px;transition:width 1s linear}
+.quiz-progress-fill.warn{background:var(--red)}
+
+.quiz-topic{font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;padding:0 16px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.quiz-topic::before{content:'';width:6px;height:6px;background:var(--purple);border-radius:50%}
+.quiz-q{font-size:15px;font-weight:600;line-height:1.55;padding:0 16px;margin-bottom:12px}
+.quiz-img{margin:0 16px 14px;border-radius:12px;overflow:hidden;background:var(--bg2);border:1px solid var(--border-lt)}
+.quiz-img img,.quiz-img svg{width:100%;display:block}
+
+.quiz-hint{display:flex;align-items:center;gap:6px;margin:0 16px 14px;padding:8px 12px;background:var(--purple-bg);border-radius:10px;font-size:12px;color:var(--purple);font-weight:500;cursor:pointer;border:none;width:fit-content;font-family:inherit}
+.quiz-hint svg{flex-shrink:0}
+.hint-text{display:none;font-weight:400;color:var(--text2);margin-left:4px}
+.quiz-hint.revealed .hint-text{display:inline}
+
+.quiz-opts{display:flex;flex-direction:column;gap:10px;padding:0 16px;position:relative}
+.q-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--bg);font-family:inherit;font-size:14px;width:100%;text-align:left}
+.q-opt:hover:not(.done){border-color:var(--purple);background:var(--purple-bg)}
+.q-opt.done{pointer-events:none}
+.q-opt .letter{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);flex-shrink:0}
+.q-opt .label{font-weight:500;flex:1}
+.q-opt .badge{margin-left:auto;font-size:11px;font-weight:500;color:var(--text3)}
+.q-opt.selected{border-color:var(--purple);background:var(--purple-bg)}
+.q-opt.selected .letter{background:var(--purple);color:#fff}
+.q-opt.correct{border-color:var(--green);background:#E8F5E9}.q-opt.correct .letter{background:var(--green);color:#fff}
+.q-opt.wrong{border-color:var(--red);background:#FFEBEE}.q-opt.wrong .letter{background:var(--red);color:#fff}
+.q-opt.faded{opacity:.45}
+
+/* ===== CONFIDENCE MODAL ===== */
+.conf-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.conf-overlay.show{display:flex}
+.conf-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 32px;animation:slideUp .3s ease}
+.conf-pill{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+.conf-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:4px}
+.conf-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px}
+.conf-scale{display:flex;gap:10px;justify-content:center;margin-bottom:8px}
+.conf-btn{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--bg);font-size:18px;font-weight:800;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.conf-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
+.conf-btn.active{border-color:var(--purple);background:var(--purple);color:#fff;transform:scale(1.1)}
+.conf-labels{display:flex;justify-content:space-between;padding:0 8px;margin-bottom:20px}
+.conf-labels span{font-size:10px;color:var(--text3);font-weight:500}
+.conf-submit{width:100%;padding:14px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;opacity:.4;pointer-events:none;transition:all .2s}
+.conf-submit.ready{opacity:1;pointer-events:auto}
+
+/* ===== POST ANSWER ===== */
+.post-answer{padding:16px;display:none}
+.post-answer.show{display:block}
+.pa-banner{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;margin-bottom:14px}
+.pa-banner.win{background:linear-gradient(135deg,#E8F5E9,#C8E6C9)}.pa-banner.lose{background:#FFEBEE}
+.pa-banner .emoji{font-size:28px;flex-shrink:0}
+.pa-banner h4{font-size:15px;font-weight:700}
+.pa-banner p{font-size:12px;color:var(--text2);margin-top:2px}
+.pa-explain{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px;border-left:3px solid var(--purple)}
+.pa-explain h5{font-size:11px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.pa-explain p{font-size:13px;color:var(--text2);line-height:1.6}.pa-explain strong{color:var(--text1)}
+
+/* Cross-sell: activation (both correct & wrong) */
+.pa-activate{background:var(--purple-bg);border:1.5px solid var(--purple-lt);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.pa-activate-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.pa-activate-info{flex:1}.pa-activate-info h5{font-size:13px;font-weight:700;color:var(--text1)}.pa-activate-info span{font-size:11px;color:var(--text2);line-height:1.4;display:block;margin-top:2px}
+.pa-activate-btn{padding:7px 14px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+.pa-activate-btn.green{background:var(--green)}
+.pa-activate-btn.orange{background:var(--orange)}
+
+.pa-gap-cta{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#FFF3E0;border-radius:10px;margin-bottom:10px;font-size:12px;font-weight:600;color:var(--orange)}
+.pa-gap-cta svg{flex-shrink:0}
+
+.pa-insights{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;background:var(--purple-bg);border-radius:12px;font-size:14px;font-weight:600;color:var(--purple);cursor:pointer;border:none;width:100%;font-family:inherit;transition:background .15s;margin-top:4px}
+.pa-insights:active{background:var(--purple-lt)}
+
+/* ===== INSIGHTS ===== */
+.ins-dropdown{position:relative}
+.ins-dropdown select{appearance:none;-webkit-appearance:none;background:var(--purple-bg);border:1.5px solid var(--purple-lt);border-radius:10px;padding:8px 32px 8px 12px;font-size:13px;font-weight:600;color:var(--purple);font-family:inherit;cursor:pointer}
+.ins-dropdown::after{content:'';position:absolute;right:12px;top:50%;transform:translateY(-50%);border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--purple);pointer-events:none}
+
+.ins-tabs{display:flex;border-bottom:2px solid var(--border-lt);padding:0 16px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ins-tabs::-webkit-scrollbar{display:none}
+.ins-tab{flex:none;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;font-family:inherit;transition:all .2s}
+.ins-tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.ins-panel{display:none;padding:16px}.ins-panel.active{display:block}
+
+.ins-next{display:flex;align-items:center;gap:12px;padding:14px 16px;margin:0 0 0;background:var(--bg2);border-radius:12px}
+.ins-next .ring{width:36px;height:36px;flex-shrink:0}
+.ins-next .ring svg{transform:rotate(-90deg)}
+.ins-next-info h4{font-size:13px;font-weight:600}
+.ins-next-info span{font-size:11px;color:var(--text3)}
+
+/* Self insights */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(--bg2);border-radius:12px;padding:14px}
+.stat-lbl{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px}
+.stat-val{font-size:24px;font-weight:800;display:flex;align-items:center;gap:6px}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}.stat-sub.up{color:var(--green)}.stat-sub.dn{color:var(--red)}
+
+.weekly{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.weekly h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.week-row{display:flex;gap:6px;align-items:center}
+.week-day{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.week-day .dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.week-day .dot.g{background:var(--green)}.week-day .dot.r{background:var(--red)}.week-day .dot.skip{background:var(--orange)}.week-day .dot.x{background:#D1D5DB;color:#9CA3AF}
+.week-day span{font-size:10px;color:var(--text3);font-weight:500}
+
+/* Confidence meter heatmap */
+.conf-meter{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.conf-meter h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.conf-heatmap{display:flex;gap:6px;margin-bottom:10px}
+.conf-heatmap-cell{flex:1;text-align:center;padding:10px 0;border-radius:10px;position:relative}
+.conf-heatmap-cell .num{font-size:18px;font-weight:800;color:#fff}
+.conf-heatmap-cell .count{font-size:9px;font-weight:600;color:rgba(255,255,255,.8);margin-top:1px}
+.conf-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700}
+.conf-tag.confident{background:var(--green-lt);color:var(--green)}
+.conf-tag.overconfident{background:#FFF3E0;color:var(--orange)}
+.conf-tag.underconfident{background:var(--red-lt);color:var(--red)}
+.conf-meter-avg{display:flex;align-items:center;gap:8px;margin-top:10px}
+.conf-meter-avg .big{font-size:28px;font-weight:900;color:var(--purple)}
+.conf-meter-avg .of{font-size:13px;color:var(--text3);font-weight:500}
+
+/* Skill map */
+.skillmap{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.skillmap h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.sk-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}.sk-row:last-child{margin-bottom:0}
+.sk-name{font-size:12px;color:var(--text2);font-weight:500;width:100px;flex-shrink:0}
+.sk-track{flex:1;height:8px;background:var(--border-lt);border-radius:4px;overflow:hidden}
+.sk-fill{height:100%;border-radius:4px}
+.sk-pct{font-size:11px;font-weight:600;color:var(--text2);width:32px;text-align:right}
+
+.share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--text1);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:14px;transition:opacity .15s}
+.share-btn:active{opacity:.85}
+
+/* Community */
+.comm-q-header{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600;line-height:1.5}
+.comm-q-header .comm-q-label{font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.comm-q-img{width:100%;border-radius:8px;margin-top:8px;overflow:hidden}
+.comm-q-img svg{width:100%;display:block}
+.comm-qnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.comm-qnav button{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);transition:all .15s}
+.comm-qnav button:active{background:var(--bg2)}
+.comm-qnav button:disabled{opacity:.3;cursor:default}
+.comm-qnav span{font-size:12px;color:var(--text3);font-weight:500}
+
+.chart-box{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+.chart-box h4{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px}
+.bars{display:flex;align-items:flex-end;justify-content:space-around;height:110px;gap:8px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.bar-wrap{width:100%;height:90px;display:flex;align-items:flex-end;justify-content:center}
+.bar{width:80%;border-radius:6px 6px 2px 2px;min-height:4px;transition:height .4s ease}
+.bar.hi{background:var(--green)}.bar.lo{background:var(--border)}
+.bar-lbl{font-size:12px;font-weight:700;color:var(--text2)}.bar-lbl.hi{color:var(--green)}
+.bar-pct{font-size:11px;font-weight:600;color:var(--text3)}.bar-pct.hi{color:var(--green)}
+.chart-summary{font-size:13px;color:var(--text2);margin-top:10px;line-height:1.5}
+.chart-summary strong{color:var(--green)}.chart-summary em{color:var(--text3);font-style:normal}
+
+.comm-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.comm-stat{background:var(--bg2);border-radius:12px;padding:12px;text-align:center}
+.comm-stat .val{font-size:20px;font-weight:800;margin-bottom:2px}
+.comm-stat .lbl{font-size:10px;color:var(--text3);font-weight:500}
+
+/* Courses */
+.course-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.course{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border-lt)}
+.course:last-child{border-bottom:none}
+.course-ic{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.course-info{flex:1}.course-info h5{font-size:13px;font-weight:600;margin-bottom:2px}.course-info span{font-size:11px;color:var(--text3)}
+.c-badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+.c-badge.gap{background:#FFF3E0;color:var(--orange)}.c-badge.pop{background:var(--purple-lt);color:var(--purple)}.c-badge.new{background:var(--green-lt);color:var(--green)}
+
+/* Learning Tab */
+.learn-header{margin-bottom:16px}
+.learn-header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.learn-header h3{font-size:16px;font-weight:800}
+.learn-datepicker{position:relative}
+.learn-datepicker input[type="date"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.ldp-display{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--purple-lt);border-radius:8px;font-size:11px;font-weight:600;color:var(--purple);cursor:pointer}
+.learn-subtitle{font-size:12px;color:var(--text3);font-weight:500}
+
+/* Unread banner */
+.unread-banner{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;background:var(--purple);color:#fff;border-radius:10px;margin-bottom:14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .3s}
+.unread-banner.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden}
+
+.lcard{background:var(--bg);border:1px solid var(--border-lt);border-radius:16px;margin-bottom:14px;overflow:hidden}
+.lcard-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0}
+.lcard-time{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+.lcard-time .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.lcard-time .dot.red{background:var(--red)}.lcard-time .dot.green{background:var(--green)}.lcard-time .dot.neutral{background:var(--orange)}
+.lcard-time span{color:var(--text3)}
+.lcard-save{background:none;border:none;cursor:pointer;padding:4px;color:var(--text3);transition:color .15s}
+.lcard-save.saved{color:var(--purple)}
+.lcard-save:active{transform:scale(1.2)}
+
+.lcard-headline{font-size:15px;font-weight:700;line-height:1.45;padding:8px 16px 0}
+.lcard-section{padding:10px 16px}
+.lcard-section-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.lcard-section-hdr .ic{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lcard-section-hdr .ic.what{background:#EDE7F6}
+.lcard-section-hdr .ic.why{background:#FFF8E1}
+.lcard-section-hdr h5{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)}
+.lcard-section p{font-size:13px;color:var(--text2);line-height:1.6;padding-left:26px}
+.lcard-section strong{color:var(--text1)}
+
+.lcard-learning{margin:0 16px 14px;padding:12px 14px;background:linear-gradient(135deg,#F8F5FC,#EDE7F6);border-radius:12px;border-left:3px solid var(--purple)}
+.lcard-learning .lrn-hdr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.lcard-learning .lrn-hdr span{font-size:15px}
+.lcard-learning .lrn-hdr h5{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--purple)}
+.lcard-learning p{font-size:13px;color:var(--text1);line-height:1.6;font-weight:600}
+
+.lcard-footer{display:flex;align-items:center;justify-content:flex-end;padding:0 16px 12px}
+.lcard-footer .learn-more{font-size:12px;color:var(--purple);font-weight:600;cursor:pointer;background:none;border:none;font-family:inherit;display:flex;align-items:center;gap:4px}
+
+/* Bottom nav */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border-lt);display:flex;padding:6px 0 env(safe-area-inset-bottom,8px);z-index:50}
+.bnav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:10px;color:var(--text3);font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit}
+.bnav-i.on{color:var(--purple)}
+.bnav-i svg{width:22px;height:22px}
+.bspacer{height:70px}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .3s ease forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(120vh) rotate(720deg) scale(0.5);opacity:0}}
+.confetti-piece{position:fixed;z-index:3000;pointer-events:none;animation:confettiFall 2.5s ease-in forwards}
+@keyframes celebFlash{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+.celeb-flash{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,200,83,.15);z-index:2500;pointer-events:none;animation:celebFlash .6s ease forwards}
+@keyframes bigCheck{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.2) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+.big-check{animation:bigCheck .5s cubic-bezier(.17,.67,.35,1.5) forwards}
+@keyframes shakeWrong{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shakeWrong .4s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- ==================== HOMEPAGE ==================== -->
+<div class="view active" id="viewHome">
+  <div class="ux-status"><span>12:34</span><span>●●●● 5G</span></div>
+  <div class="ux-header">
+    <div class="ux-logo">up</div>
+    <div class="ux-search"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search for scrips</div>
+    <div style="display:flex;gap:12px;align-items:center">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <div style="width:28px;height:28px;background:var(--purple);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px">P+</div>
+    </div>
+  </div>
+  <div class="ux-indices">
+    <div><div class="idx-name">NIFTY50</div><div class="idx-val">22,948.20</div><div class="idx-chg dn">-358.25 (1.54%)</div></div>
+    <div><div class="idx-name">NIFTY BANK</div><div class="idx-val">52,530.20</div><div class="idx-chg dn">-1,177.90 (2.19%)</div></div>
+  </div>
+  <div class="qa-grid">
+    <div class="qa-item"><div class="qa-ic">📊</div>Options</div>
+    <div class="qa-item"><div class="qa-ic">📈</div>Futures</div>
+    <div class="qa-item"><div class="qa-ic">🏛️</div>Stocks</div>
+    <div class="qa-item"><div class="qa-ic">💰</div>MF</div>
+    <div class="qa-item"><div class="qa-ic">🪙</div>Gold</div>
+  </div>
+  <div class="chips"><div class="chip">📋 Option chain</div><div class="chip">₹ FII/DII</div><div class="chip">⚡ Scalper</div><div class="chip">🔄 OI analysis</div><div class="chip">📐 Strategy builder</div></div>
+  <div class="port">
+    <div class="port-hdr"><h3>Portfolio (Today)</h3><a>6 Insights ›</a></div>
+    <div class="port-link">Positions P&L (2) <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+    <div class="port-link">Holdings P&L (32) <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9CA3AF" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+  </div>
+
+  <div class="miq-card" id="miqCard" onclick="showView('quiz')">
+    <div id="cardLive">
+      <div class="miq-card-row">
+        <div class="miq-logo">MIQ</div>
+        <div class="miq-info">
+          <h3>Market IQ <span class="streak-badge" id="homeStreak"></span></h3>
+          <div class="miq-sub"><span class="live">● Live</span><span class="dot"></span><span id="homeTraders"></span></div>
+        </div>
+        <div class="miq-chevron"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+      </div>
+    </div>
+    <div id="cardDone" style="display:none">
+      <div class="miq-card-row">
+        <div class="miq-logo">MIQ</div>
+        <div class="miq-info">
+          <h3>Market IQ <span class="streak-badge" id="homeStreak2"></span></h3>
+          <div class="miq-sub"><span style="color:var(--green);font-weight:600">✓ Done for today</span></div>
+        </div>
+        <div class="miq-chevron"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></div>
+      </div>
+      <div class="miq-done-row">
+        <div class="timer-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="done-info"><span>Next quiz in</span><strong id="homeNextTimer">5h 48m</strong></div>
+        <button class="notify-btn" onclick="event.stopPropagation()">Notify me</button>
+      </div>
+    </div>
+  </div>
+  <div class="bspacer"></div>
+</div>
+
+<!-- ==================== QUIZ VIEW ==================== -->
+<div class="view" id="viewQuiz">
+  <div class="s-hdr">
+    <button class="s-back" onclick="showView('home')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>Market IQ</button>
+    <div class="s-streak" id="quizStreak"></div>
+  </div>
+  <div class="quiz-timer-bar"><span>Time remaining</span><strong id="timerVal">30s</strong></div>
+  <div class="quiz-progress"><div class="quiz-progress-fill" id="progFill"></div></div>
+  <div class="quiz-topic" id="qTopic"></div>
+  <div class="quiz-q" id="qText"></div>
+  <div class="quiz-img" id="qImg" style="display:none"></div>
+  <button class="quiz-hint" id="hintBtn" onclick="toggleHint()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    Hint
+    <span class="hint-text" id="hintText"></span>
+  </button>
+  <div class="quiz-opts" id="quizOpts"></div>
+  <div class="post-answer" id="postAnswer">
+    <div id="paBanner"></div>
+    <div class="pa-explain" id="paExplain" style="display:none"></div>
+    <div id="paCrossSell"></div>
+    <button class="pa-insights" onclick="showView('insights')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.22-8.56"/><path d="M22 2L15 9"/><path d="M16 2h6v6"/></svg>
+      View Insights
+    </button>
+  </div>
+  <div class="bspacer"></div>
+</div>
+
+<!-- ==================== CONFIDENCE MODAL ==================== -->
+<div class="conf-overlay" id="confOverlay">
+  <div class="conf-sheet">
+    <div class="conf-pill"></div>
+    <div class="conf-title">How confident are you?</div>
+    <div class="conf-sub">Rate your confidence before we reveal the answer</div>
+    <div class="conf-scale" id="confScale">
+      <button class="conf-btn" data-val="1" onclick="pickConf(1)">1</button>
+      <button class="conf-btn" data-val="2" onclick="pickConf(2)">2</button>
+      <button class="conf-btn" data-val="3" onclick="pickConf(3)">3</button>
+      <button class="conf-btn" data-val="4" onclick="pickConf(4)">4</button>
+      <button class="conf-btn" data-val="5" onclick="pickConf(5)">5</button>
+    </div>
+    <div class="conf-labels"><span>Just guessing</span><span>Absolutely sure</span></div>
+    <button class="conf-submit" id="confSubmit" onclick="submitConf()">Reveal Answer</button>
+  </div>
+</div>
+
+<!-- ==================== INSIGHTS VIEW ==================== -->
+<div class="view" id="viewInsights">
+  <div class="s-hdr">
+    <button class="s-back" onclick="showView(answered?'quiz':'home')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>Insights</button>
+    <div class="s-streak" id="insStreak"></div>
+  </div>
+
+  <div class="ins-next" style="margin:12px 16px">
+    <div class="ring"><svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#E5E7EB" stroke-width="3"/><circle cx="18" cy="18" r="15" fill="none" stroke="#7B2FC4" stroke-width="3" stroke-dasharray="94.25" stroke-dashoffset="23" stroke-linecap="round"/></svg></div>
+    <div class="ins-next-info"><h4 id="insNextTimer">Next question in 5h 48m</h4><span>Answer daily to keep your streak alive</span></div>
+    <button style="margin-left:auto;padding:5px 10px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">Notify</button>
+  </div>
+
+  <div class="ins-tabs">
+    <button class="ins-tab active" data-tab="insights" onclick="insTab('insights')">Insights</button>
+    <button class="ins-tab" data-tab="learning" onclick="insTab('learning')">Learning</button>
+    <button class="ins-tab" data-tab="courses" onclick="insTab('courses')">Courses</button>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="ins-panel active" id="ins-insights">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="ins-dropdown">
+        <select id="insightsView" onchange="toggleInsView()">
+          <option value="community">Community</option>
+          <option value="self">Self</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="communityView">
+      <div class="comm-q-header" id="commQHeader"></div>
+      <div class="comm-qnav">
+        <button id="commPrev" onclick="commNav(-1)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+        <span id="commQLabel"></span>
+        <button id="commNext" onclick="commNav(1)"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <div class="quiz-opts" id="commOpts" style="margin-bottom:14px"></div>
+      <div class="chart-box fade-up" id="commChart">
+        <h4 id="commChartTitle"></h4>
+        <div class="bars" id="commBars"></div>
+        <div class="chart-summary" id="commSummary"></div>
+      </div>
+      <div class="comm-stats" id="commStatsGrid"></div>
+    </div>
+
+    <div id="selfView" style="display:none">
+      <div class="stat-grid fade-up" id="selfStats"></div>
+      <div class="weekly fade-up" id="selfWeekly"></div>
+      <div class="conf-meter fade-up" id="selfConfMeter"></div>
+      <div class="stat-grid fade-up" id="selfSpeedStats"></div>
+      <div class="skillmap fade-up" id="selfSkillmap"></div>
+      <button class="share-btn" onclick="shareStats()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+        Share your stats
+      </button>
+    </div>
+  </div>
+
+  <!-- LEARNING -->
+  <div class="ins-panel" id="ins-learning">
+    <div class="learn-header fade-up">
+      <div class="learn-header-top">
+        <h3>Market Lessons</h3>
+        <div class="learn-datepicker">
+          <input type="date" id="learnDate" onchange="onLearnDateChange()">
+          <div class="ldp-display" onclick="document.getElementById('learnDate').showPicker()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="learnDateLabel">TODAY</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+      <p class="learn-subtitle">Real moves. Real reasons. Learn while you trade.</p>
+    </div>
+    <div id="unreadBanner" class="unread-banner"></div>
+    <div id="learnCards"></div>
+  </div>
+
+  <!-- COURSES -->
+  <div class="ins-panel" id="ins-courses">
+    <div id="coursesContainer"></div>
+  </div>
+
+  <div style="height:32px"></div>
+</div>
+
+<!-- Bottom nav -->
+<div class="bnav" id="bnav">
+  <button class="bnav-i on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>Home</button>
+  <button class="bnav-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>My Lists</button>
+  <button class="bnav-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Orders</button>
+  <button class="bnav-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h4v-4h-4z"/></svg>Portfolio</button>
+  <button class="bnav-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Funds</button>
+</div>
+
+<script>
+// ===== UTILITY =====
+function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function randBetween(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+const letters = ['A','B','C','D'];
+
+// ===== SESSION-BASED ROTATION (no repeat for 7 refreshes) =====
+function getRotationIndex(poolSize, key) {
+  let idx = parseInt(sessionStorage.getItem('miq_' + key) || '-1');
+  idx = (idx + 1) % poolSize;
+  sessionStorage.setItem('miq_' + key, idx);
+  return idx;
+}
+
+// ===== MOCK STREAK DATA (50+ day) =====
+const STREAK = 53;
+const BEST_STREAK = 53;
+const ACC_7D = 82;
+const ACC_PREV_7D = 74;
+const AVG_SPEED = 9;
+const GLOBAL_AVG_SPEED = 14;
+const HINTS_THIS_WEEK = 2;
+const HINT_CHANGE = -40;
+
+// Confidence heatmap data
+const confHeatmap = [
+  { val:1, count: randBetween(2,5) },
+  { val:2, count: randBetween(4,8) },
+  { val:3, count: randBetween(10,15) },
+  { val:4, count: randBetween(14,18) },
+  { val:5, count: randBetween(6,10) },
+];
+const totalConfAnswers = confHeatmap.reduce((s,c) => s + c.count, 0);
+const confAvg = +(confHeatmap.reduce((s,c) => s + c.val * c.count, 0) / totalConfAnswers).toFixed(1);
+const confCorrectHighConf = randBetween(60,80);
+const confCorrectLowConf = randBetween(40,65);
+let confTag, confTagClass;
+if (confCorrectHighConf >= 60 && confCorrectLowConf >= 50) { confTag = 'Confident'; confTagClass = 'confident'; }
+else if (confCorrectHighConf < 50) { confTag = 'Overconfident'; confTagClass = 'overconfident'; }
+else { confTag = 'Underconfident'; confTagClass = 'underconfident'; }
+
+// ===== QUESTION POOL =====
+const questionPool = [
+  { topic:'OPTIONS · DELTA', q:'Nifty 23000 CE trades at ₹325. Delta is 0.42. Nifty moves up 100 pts — what is the approximate new premium?', opts:['₹342','₹367','₹383','₹410'], correct:1, hint:'Delta × price move = change in premium', explain:'Delta × move = 0.42 × 100 = <strong>+42</strong>. New premium ≈ <strong>₹325 + ₹42 = ₹367</strong>.', tag:'Delta & Price' },
+  { topic:'OPTIONS · THETA', q:'If Theta of a Nifty 23000 CE is -8.5, how much value does it lose overnight if nothing else changes?', opts:['₹4.25','₹8.50','₹17.00','₹0 — theta only works on expiry day'], correct:1, hint:'Theta = daily time decay in rupees', explain:'Theta measures <strong>daily time decay</strong>. A theta of -8.5 means the option loses <strong>₹8.50</strong> every day, all else equal.', tag:'Theta & Expiry' },
+  { topic:'OPTIONS · GAMMA', q:'Which Greek measures the rate of change of Delta?', opts:['Theta','Vega','Gamma','Rho'], correct:2, hint:'Think of it as the "Delta of Delta"', explain:'<strong>Gamma</strong> measures how much Delta changes for every 1-point move in the underlying.', tag:'Delta & Price' },
+  { topic:'OPTIONS · IV', q:'Nifty Bank CE has IV of 22%. RBI policy is tomorrow. What typically happens to IV after the event?', opts:['IV increases sharply','IV stays the same','IV drops — this is called IV crush','Depends on the direction'], correct:2, hint:'Events create uncertainty. What happens when uncertainty is resolved?', explain:'After events, uncertainty resolves and the "risk premium" deflates. This is <strong>IV crush</strong>.', tag:'IV & Volatility' },
+  { topic:'OPTIONS · OI', q:'Nifty 24000 CE has the highest Open Interest for this expiry. What does this typically signal?', opts:['Strong support at 24000','Strong resistance at 24000','Nifty will reach 24000','Option writers are bullish'], correct:1, hint:'High Call OI = many calls written = writers defend that level', explain:'High Call OI at a strike means <strong>many options were sold there</strong>. Writers want price below, creating <strong>resistance</strong>.', tag:'OI & Market Structure' },
+  { topic:'OPTIONS · STRATEGY', q:'You sell a 23000 CE and a 23000 PE simultaneously. What is this strategy called?', opts:['Strangle','Iron Condor','Short Straddle','Covered Call'], correct:2, hint:'Same strike, both CE and PE sold', explain:'Selling both CE and PE at the <strong>same strike</strong> is a <strong>Short Straddle</strong>. You profit when the market stays near that strike.', tag:'Strategy' },
+  { topic:'INTRADAY · VWAP', q:'A stock is trading above VWAP with rising volume. What does this generally indicate?', opts:['Bearish signal','Bullish control — buyers are aggressive','Stock is overvalued','Time to exit longs'], correct:1, hint:'VWAP = Volume Weighted Average Price — the fair price for the day', explain:'Price <strong>above VWAP with volume</strong> means buyers pay above average — a <strong>bullish momentum</strong> signal.', tag:'Delta & Price' },
+  { topic:'CHARTS · PATTERNS', q:'A long red candle followed by a small green candle inside its body — what pattern is this?', opts:['Engulfing','Harami','Doji','Morning Star'], correct:1, hint:'The small candle is "inside" the big one', explain:'This is a <strong>Bullish Harami</strong>. The small candle shows selling pressure is fading.', tag:'Strategy' },
+  { topic:'F&O · EXPIRY', q:'It\'s 2:30 PM on expiry Thursday. Your ATM option has ₹15 premium left. What happens to most of this in the next 90 min?', opts:['It increases','Stays roughly the same','Most evaporates due to theta','Converts to intrinsic value'], correct:2, hint:'Time value decays exponentially — the last hours are brutal', explain:'On expiry day, <strong>time value decays extremely fast</strong> in the final hours.', tag:'Theta & Expiry' },
+  { topic:'MACRO · FII/DII', q:'FIIs sold ₹5,200 Cr today but Nifty still closed green. What most likely happened?', opts:['FII data is wrong','DIIs absorbed the selling','Retail traders drove the market','The market ignores FII data'], correct:1, hint:'When one big group sells, another must be buying', explain:'When FIIs sell heavily but the market holds, <strong>DIIs absorbed the selling</strong>.', tag:'OI & Market Structure' },
+  { topic:'CHARTS · SUPPORT/RESISTANCE', q:'Look at the Nifty chart below. The price has tested the highlighted zone 3 times and bounced. What is this level?', opts:['Resistance','Support','Pivot Point','Moving Average'], correct:1, hint:'Price bounces UP from this level repeatedly', explain:'<strong>Support</strong> is a price level where demand prevents further decline. Three bounces confirm it.', tag:'Delta & Price', image:'support' },
+  { topic:'OPTIONS · PAYOFF', q:'The payoff diagram below shows which options strategy?', opts:['Long Call','Short Straddle','Bull Call Spread','Iron Condor'], correct:1, hint:'Look at the shape — max profit at center, risk on both sides', explain:'The <strong>inverted V payoff</strong> with max profit at center and risk on both sides is a <strong>Short Straddle</strong>.', tag:'Strategy', image:'straddle' },
+  { topic:'CHARTS · CANDLESTICK', q:'What pattern does the highlighted candlestick formation in the chart represent?', opts:['Bullish Engulfing','Bearish Engulfing','Hammer','Shooting Star'], correct:0, hint:'A green candle completely covers the previous red candle', explain:'A <strong>Bullish Engulfing</strong> pattern occurs when a green candle completely engulfs the prior red candle\'s body.', tag:'IV & Volatility', image:'engulfing' },
+];
+
+// ===== SVG IMAGE GENERATORS =====
+function genSupportChart() {
+  return `<svg viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg"><rect width="380" height="180" fill="#FAFAFA"/><line x1="40" y1="150" x2="360" y2="150" stroke="#E5E7EB" stroke-width="1"/><line x1="40" y1="120" x2="360" y2="120" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4"/><line x1="40" y1="90" x2="360" y2="90" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4"/><rect x="40" y="110" width="320" height="16" fill="#E8F5E9" rx="2" opacity="0.6"/><line x1="40" y1="118" x2="360" y2="118" stroke="#00C853" stroke-width="1.5" stroke-dasharray="6,3"/><text x="362" y="121" font-size="9" fill="#00C853" font-weight="600">Support</text><polyline points="50,70 80,55 110,80 140,60 170,90 195,118 210,100 240,75 270,95 295,118 310,105 330,118 345,100" fill="none" stroke="#7B2FC4" stroke-width="2.5" stroke-linecap="round"/><circle cx="195" cy="118" r="5" fill="none" stroke="#FF6D00" stroke-width="2"/><circle cx="295" cy="118" r="5" fill="none" stroke="#FF6D00" stroke-width="2"/><circle cx="330" cy="118" r="5" fill="none" stroke="#FF6D00" stroke-width="2"/><text x="185" y="140" font-size="8" fill="#FF6D00" font-weight="600">Bounce 1</text><text x="280" y="140" font-size="8" fill="#FF6D00" font-weight="600">Bounce 2</text><text x="318" y="140" font-size="8" fill="#FF6D00" font-weight="600">Bounce 3</text></svg>`;
+}
+function genStraddleChart() {
+  return `<svg viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg"><rect width="380" height="180" fill="#FAFAFA"/><line x1="40" y1="90" x2="360" y2="90" stroke="#E5E7EB" stroke-width="1"/><text x="365" y="93" font-size="8" fill="#9CA3AF">Breakeven</text><line x1="190" y1="20" x2="190" y2="170" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="4"/><text x="175" y="175" font-size="8" fill="#9CA3AF">ATM Strike</text><polyline points="40,30 120,70 190,40 260,70 340,30" fill="none" stroke="#FF1744" stroke-width="2.5" stroke-linecap="round"/><circle cx="190" cy="40" r="4" fill="#00C853"/><text x="168" y="34" font-size="9" fill="#00C853" font-weight="700">Max Profit</text><rect x="60" y="95" width="260" height="18" fill="#E8F5E9" rx="3" opacity="0.4"/><text x="150" y="108" font-size="9" fill="#00C853" font-weight="500">Profit Zone</text></svg>`;
+}
+function genEngulfingChart() {
+  return `<svg viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg"><rect width="380" height="180" fill="#FAFAFA"/><line x1="30" y1="150" x2="370" y2="150" stroke="#E5E7EB" stroke-width="1"/><line x1="50" y1="40" x2="50" y2="75" stroke="#FF1744" stroke-width="1.5"/><rect x="42" y="50" width="16" height="20" fill="#FF1744" rx="1"/><line x1="90" y1="55" x2="90" y2="90" stroke="#FF1744" stroke-width="1.5"/><rect x="82" y="65" width="16" height="20" fill="#FF1744" rx="1"/><line x1="130" y1="70" x2="130" y2="105" stroke="#FF1744" stroke-width="1.5"/><rect x="122" y="80" width="16" height="20" fill="#FF1744" rx="1"/><line x1="170" y1="85" x2="170" y2="115" stroke="#FF1744" stroke-width="1.5"/><rect x="162" y="95" width="16" height="15" fill="#FF1744" rx="1"/><line x1="210" y1="95" x2="210" y2="130" stroke="#FF1744" stroke-width="1.5"/><rect x="202" y="105" width="16" height="15" fill="#FF1744" rx="1"/><rect x="237" y="98" width="76" height="42" fill="#FFF3E0" rx="4" opacity="0.5"/><line x1="260" y1="95" x2="260" y2="130" stroke="#FF1744" stroke-width="1.5"/><rect x="252" y="108" width="16" height="12" fill="#FF1744" rx="1"/><line x1="300" y1="75" x2="300" y2="135" stroke="#00C853" stroke-width="1.5"/><rect x="292" y="85" width="16" height="40" fill="#00C853" rx="1"/><line x1="340" y1="65" x2="340" y2="100" stroke="#00C853" stroke-width="1.5"/><rect x="332" y="72" width="16" height="20" fill="#00C853" rx="1"/><text x="252" y="152" font-size="9" fill="#FF6D00" font-weight="700">Bullish Engulfing</text></svg>`;
+}
+const imageGenerators = { support: genSupportChart, straddle: genStraddleChart, engulfing: genEngulfingChart };
+
+// ===== COMMUNITY QUESTION POOL =====
+const communityPool = [
+  { q:'Nifty 23000 CE at ₹325, Delta 0.42. Nifty +100 pts → new premium?', opts:['₹342','₹367','₹383','₹410'], pcts:[18,61,16,5], correct:1, traders:'9,86,454', avgTime:'14s', hintPct:8 },
+  { q:'If Theta of an option is -5, how much value does it lose in 1 day?', opts:['₹10','₹2','₹5','₹15'], pcts:[12,8,72,8], correct:2, traders:'8,42,100', avgTime:'12s', hintPct:15 },
+  { q:'What happens to ATM call premium when IV drops 5%?', opts:['Increases','Decreases','No change','Depends on Delta'], pcts:[22,55,13,10], correct:1, traders:'7,91,300', avgTime:'16s', hintPct:22 },
+  { q:'Nifty put has Delta -0.3. Nifty falls 200 pts. Premium change?', opts:['₹40','₹45','₹60','₹80'], pcts:[15,10,65,10], correct:2, traders:'9,12,000', avgTime:'15s', hintPct:11 },
+  { q:'Which Greek measures rate of change of Delta?', opts:['Theta','Vega','Gamma','Rho'], pcts:[8,12,70,10], correct:2, traders:'10,20,500', avgTime:'9s', hintPct:5 },
+  { q:'If you sell a straddle, you profit when...?', opts:['Low volatility','High volatility','Market rallies','Market crashes'], pcts:[60,20,12,8], correct:0, traders:'8,80,000', avgTime:'13s', hintPct:18 },
+  { q:'Max loss on a long call option is?', opts:['Premium paid','Unlimited','Strike price','Spot - Strike'], pcts:[65,15,12,8], correct:0, traders:'11,05,200', avgTime:'8s', hintPct:3 },
+  { q:'What does a breakout above resistance with 3x volume signal?', opts:['Fakeout','Strong bullish move','Bearish reversal','No significance'], pcts:[12,68,10,10], correct:1, traders:'7,55,000', avgTime:'11s', hintPct:9 },
+  { q:'PCR (Put Call Ratio) is 1.4. What does this indicate?', opts:['Bearish','Bullish','Neutral','High volatility'], pcts:[30,52,10,8], correct:1, traders:'8,10,000', avgTime:'15s', hintPct:20 },
+  { q:'Look at this chart. The price bounced 3 times from the highlighted zone. What is this level?', opts:['Resistance','Support','Pivot Point','Moving Average'], pcts:[10,72,12,6], correct:1, traders:'9,45,000', avgTime:'10s', hintPct:7, image:'support' },
+  { q:'The payoff diagram below shows which options strategy?', opts:['Long Call','Short Straddle','Bull Call Spread','Iron Condor'], pcts:[8,65,18,9], correct:1, traders:'7,20,000', avgTime:'13s', hintPct:14, image:'straddle' },
+];
+
+// ===== ACTIVATION CROSS-SELLS (non-signed-in user — for CORRECT answers) =====
+const correctCrossSells = [
+  { name:'Open Your Demat Account', desc:'You clearly know your stuff. Now trade for real — complete KYC in 5 minutes.', cta:'Open Account', icon:'📋', iconBg:'linear-gradient(135deg,#7B2FC4,#A855F7)', btnClass:'' },
+  { name:'Place Your First Trade', desc:'Smart enough to answer right. Now put it to work — buy your first stock or F&O.', cta:'Trade Now', icon:'📈', iconBg:'linear-gradient(135deg,#00C853,#69F0AE)', btnClass:'green' },
+  { name:'₹0 Brokerage on First Trade', desc:'You\'ve earned it with a 7+ day streak. Your next trade is completely free.', cta:'Claim Now', icon:'🎁', iconBg:'linear-gradient(135deg,#FF6D00,#FFB74D)', btnClass:'orange' },
+  { name:'Refer & Earn ₹500', desc:'Know someone who\'d love Market IQ? Get ₹500 when they open an account.', cta:'Refer Now', icon:'🤝', iconBg:'linear-gradient(135deg,#2979FF,#64B5F6)', btnClass:'' },
+  { name:'Get Advisor\'s Picks', desc:'You think like a pro. Now trade like one — get expert-backed trade ideas daily.', cta:'Get Picks', icon:'🎯', iconBg:'linear-gradient(135deg,#FF1744,#FF5252)', btnClass:'' },
+  { name:'Explore Trending Stocks', desc:'Your knowledge is ready. See what\'s moving today and place your first order.', cta:'Explore', icon:'🔥', iconBg:'linear-gradient(135deg,#FF6D00,#FFB74D)', btnClass:'orange' },
+];
+
+// ===== ACTIVATION CROSS-SELLS (non-signed-in user — for WRONG answers) =====
+const wrongCrossSells = [
+  { name:'Open Demat Account — Start Learning by Doing', desc:'Don\'t just read about markets — experience them. Open a free account and learn by trading.', cta:'Open Account', icon:'📋', iconBg:'linear-gradient(135deg,#7B2FC4,#A855F7)', btnClass:'' },
+  { name:'Introduction to Stock Market — UpLearn', desc:'Start from the basics. This free course covers everything you need before your first trade.', cta:'Start Free', icon:'📚', iconBg:'linear-gradient(135deg,#00BFA5,#69F0AE)', btnClass:'green' },
+  { name:'Refer & Earn ₹500', desc:'Learning together is better. Invite a friend, both of you get ₹500 when they sign up.', cta:'Refer Now', icon:'🤝', iconBg:'linear-gradient(135deg,#2979FF,#64B5F6)', btnClass:'' },
+  { name:'Get Advisor\'s Picks — Learn from Experts', desc:'Not sure what to trade? Let RAs guide you with curated picks while you build confidence.', cta:'Get Picks', icon:'🎯', iconBg:'linear-gradient(135deg,#FF1744,#FF5252)', btnClass:'' },
+  { name:'₹0 Brokerage — Practice Risk-Free', desc:'Your first trade is on us. Open an account, place your first trade with zero brokerage.', cta:'Claim Now', icon:'🎁', iconBg:'linear-gradient(135deg,#FF6D00,#FFB74D)', btnClass:'orange' },
+  { name:'Explore Trending Stocks', desc:'See what the market is doing right now. Watch, learn, and trade when you\'re ready.', cta:'Explore', icon:'🔥', iconBg:'linear-gradient(135deg,#FF6D00,#FFB74D)', btnClass:'orange' },
+];
+
+// Gap CTAs for wrong answers
+const gapCTAs = [
+  'Don\'t worry — everyone starts somewhere. Here\'s your next step.',
+  'Missed this one? That\'s okay. Learn by doing — open an account and practice.',
+  'The best way to learn markets is to be in them. Start your journey today.',
+  'Every wrong answer is a lesson. Take the next step and trade for real.',
+];
+
+// ===== LEARNING POOL =====
+const learningPool = [
+  { time:'11:24', headline:'Big sale in the stock market today.', what:'The Nifty 50 fell <strong>2.1%</strong> today. That means the average value of India\'s top 50 companies dropped by roughly that much in a single day.', why:'The US announced new tariffs on imports from several countries including India. When big countries put trade restrictions, <strong>investors get nervous and pull money out</strong>.', learning:'Indian stock markets don\'t move in isolation. What happens in the US, China, or Europe directly affects prices here.', dir:'down' },
+  { time:'15:45', headline:'Markets are afraid. Here\'s what that means.', what:'India VIX — the market\'s "fear meter" — jumped <strong>28%</strong> today. It went from 13 to <strong>17</strong> in one session.', why:'VIX measures how uncertain traders are about the near future. <strong>Big investors expect wild price swings</strong> — they pay more to protect positions.', learning:'When VIX spikes, it doesn\'t mean markets will definitely fall — it means traders expect bigger moves in either direction.', dir:'down' },
+  { time:'09:22', headline:'Sensex hit a big round number today.', what:'The Sensex crossed <strong>75,000</strong> for the first time this month. It has recovered <strong>4.2%</strong> in the last two weeks.', why:'<strong>Foreign investors</strong> started putting money back into Indian stocks after weeks of pulling out. When big money comes in, prices rise.', learning:'Markets move in cycles — they fall, they recover. The daily number just reflects how much money is flowing in or out.', dir:'up' },
+  { time:'10:15', headline:'Petrol might get cheaper. Here\'s why.', what:'Crude oil fell <strong>3.2%</strong> on global markets today. MCX Crude dropped to <strong>₹5,840</strong> per barrel.', why:'<strong>OPEC</strong> announced they will produce more oil than expected. More supply with same demand means lower prices.', learning:'Oil prices affect everything — petrol, cooking gas, airline tickets, and even inflation. When oil falls, the economy benefits.', dir:'down' },
+  { time:'14:10', headline:'Good results, falling stock. Here\'s how.', what:'Infosys announced quarterly results. Revenue grew <strong>8.7%</strong> year on year. But the stock fell <strong>4.1%</strong>.', why:'Results were <strong>slightly below expectations</strong>. In markets, price moves are driven by expectation vs reality, not just good/bad.', learning:'A company can report growth and still see its stock fall — if the growth was less than what the market anticipated.', dir:'down' },
+  { time:'09:15', headline:'Reliance gave ₹10 dividend. Also fell ₹10.', what:'Reliance declared <strong>₹10 dividend</strong>. Today is ex-date. Stock opened at ₹2,840 — <strong>₹10 below</strong> yesterday\'s close.', why:'Company pays out cash. That cash leaves the company so it\'s worth less. <strong>Exchange adjusts the opening price down</strong>.', learning:'Stock falling on ex-dividend day is not bad news. You lose ₹10 on price, gain ₹10 as dividend. Money just changed pockets.', dir:'neutral' },
+  { time:'10:30', headline:'Tata Power jumped 10% — then froze.', what:'Tata Power hit <strong>upper circuit at 9:22 AM</strong>. Price locked at +10%. No sellers. Can\'t buy even if you wanted.', why:'Large solar contract announced at open. Demand flooded in. <strong>Exchange halts trading when a stock hits its daily price limit</strong>.', learning:'Stocks in circuit can\'t be traded till the next window. Good if you hold it. Frustrating if you don\'t.', dir:'up' },
+  { time:'14:45', headline:'FIIs pulled ₹4,200 Cr out today.', what:'FIIs sold <strong>₹4,218 Cr</strong>. DIIs bought <strong>₹3,890 Cr</strong>. Nifty still ended down 0.8%.', why:'US Fed signalled higher rates for longer. <strong>Foreign money moves out</strong> when US returns look attractive.', learning:'Your stocks can fall even without any Indian news. Global money flows move our market too.', dir:'down' },
+  { time:'11:00', headline:'SBI hit a level it hadn\'t seen in 12 months.', what:'SBI crossed <strong>₹842 — new 52-week high</strong>. Volume was 1.38 Cr shares vs average of 45L. <strong>3x normal</strong>.', why:'Old highs act as ceilings. When sellers clear, <strong>price moves freely</strong>. High volume confirms real buyers.', learning:'52-week high breakout with high volume = old sellers exhausted, new buyers in control.', dir:'up' },
+  { time:'13:20', headline:'Pre-open session gapped Nifty up 150 points.', what:'Nifty opened at <strong>23,350</strong> vs yesterday\'s close of <strong>23,200</strong>. The 150-point gap happened during the 9:00–9:15 AM pre-open.', why:'<strong>Positive global cues overnight</strong> — US markets rallied 2%. Orders stacked up before open, pushing the match price higher.', learning:'Pre-open session (9:00-9:15) determines the opening price. Overnight news from US/Europe drives gap-ups and gap-downs.', dir:'up' },
+];
+
+// ===== COURSES POOL =====
+const coursesPool = [
+  { name:'Introduction to Stock Market', sub:'Free · UpLearn · 2 hrs', badge:'gap', color:'#7B2FC4,#A855F7', icon:'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+  { name:'Options Trading: Basics to Advanced', sub:'Dr. Chirag Shah · 14 hrs', badge:'pop', color:'#FF1744,#FF5252', icon:'M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z' },
+  { name:'Trading Psychology', sub:'FOMO, stop-loss discipline · 2 hrs', badge:'pop', color:'#00BFA5,#69F0AE', icon:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' },
+  { name:'Chart Pattern Mastery', sub:'H&S, flags, triangles · 5 hrs', badge:'gap', color:'#FF6D00,#FFB74D', icon:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z' },
+  { name:'Scalping NIFTY & BANKNIFTY', sub:'Mukta Dhamankar · 1 hr', badge:'new', color:'#2979FF,#64B5F6', icon:'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+  { name:'The Many Faces of Stock Options', sub:'Amit Goel · 2 hrs', badge:'pop', color:'#7B2FC4,#A855F7', icon:'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5' },
+  { name:'Options Trading Essentials', sub:'Mike Akeroyd · 27 mins', badge:'new', color:'#00BFA5,#69F0AE', icon:'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' },
+  { name:'Strategies for Trading & Portfolio', sub:'Mukta Dhamankar · 7 hrs', badge:'gap', color:'#FF1744,#FF5252', icon:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z' },
+  { name:'Technical Tools to Decode Downtrends', sub:'Milan Vaishnav · 1 hr', badge:'pop', color:'#FF6D00,#FFB74D', icon:'M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z' },
+];
+
+// Skill map: exactly 5 skills from Excel
+const skillMapData = [
+  { name:'Delta & Price', pct: randBetween(70,92) },
+  { name:'Theta & Expiry', pct: randBetween(30,55) },
+  { name:'IV & Volatility', pct: randBetween(50,75) },
+  { name:'OI & Structure', pct: randBetween(60,85) },
+  { name:'Strategy', pct: randBetween(40,65) },
+];
+
+// ===== PICK TODAY'S CONTENT =====
+const qIdx = getRotationIndex(questionPool.length, 'q');
+const todayQ = questionPool[qIdx];
+const todayCorrectCS = correctCrossSells[getRotationIndex(correctCrossSells.length, 'ccs_r')];
+const todayWrongCS = wrongCrossSells[getRotationIndex(wrongCrossSells.length, 'ccs_w')];
+const todayGapCTA = gapCTAs[getRotationIndex(gapCTAs.length, 'gap')];
+
+const lrnStart = getRotationIndex(learningPool.length, 'lrn');
+const todayLearnings = [];
+for (let i = 0; i < Math.min(5, learningPool.length); i++) todayLearnings.push(learningPool[(lrnStart + i) % learningPool.length]);
+const unreadCount = randBetween(2, 4);
+
+const commStart = getRotationIndex(communityPool.length, 'comm');
+const todayCommunity = [];
+for (let i = 0; i < 7; i++) todayCommunity.push(communityPool[(commStart + i) % communityPool.length]);
+
+const courseStart = getRotationIndex(coursesPool.length, 'crs');
+const todayCourses = [];
+for (let i = 0; i < 5; i++) todayCourses.push(coursesPool[(courseStart + i) % coursesPool.length]);
+
+const totalTraders = (randBetween(8,12) + ',' + String(randBetween(10,99)) + ',' + String(randBetween(100,999)));
+
+// ===== STATE =====
+let answered = false, picked = -1, timer = 30, interval = null, commIdx = 0;
+let confidenceVal = 0, hintUsed = false;
+
+// ===== VIEW NAVIGATION (inline, not overlay) =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (name === 'home') {
+    document.getElementById('bnav').style.display = 'flex';
+  } else {
+    document.getElementById('bnav').style.display = 'none';
+  }
+
+  if (name === 'quiz' && !answered) {
+    startTimer();
+  }
+  if (name === 'insights') {
+    renderCommQ(); renderSelfView(); renderLearnings(); renderCourses();
+  }
+}
+
+// ===== INIT UI =====
+function initUI() {
+  document.getElementById('homeStreak').textContent = '🔥 ' + STREAK;
+  document.getElementById('homeStreak2').textContent = '🔥 ' + STREAK;
+  document.getElementById('quizStreak').textContent = '🔥 ' + STREAK + ' streak';
+  document.getElementById('insStreak').textContent = '🔥 ' + STREAK + ' streak';
+  document.getElementById('homeTraders').textContent = totalTraders + ' traders answered';
+
+  document.getElementById('qTopic').textContent = todayQ.topic;
+  document.getElementById('qText').textContent = todayQ.q;
+  document.getElementById('hintText').textContent = '— ' + todayQ.hint;
+
+  if (todayQ.image && imageGenerators[todayQ.image]) {
+    document.getElementById('qImg').innerHTML = imageGenerators[todayQ.image]();
+    document.getElementById('qImg').style.display = 'block';
+  }
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('learnDate').value = today;
+  document.getElementById('learnDate').max = today;
+
+  // Wire MIQ card onclick
+  document.getElementById('miqCard').onclick = () => {
+    if (answered) { showView('insights'); } else { showView('quiz'); }
+  };
+}
+
+// ===== RENDER QUIZ OPTIONS =====
+function renderQuizOpts() {
+  const el = document.getElementById('quizOpts');
+  el.innerHTML = '';
+  todayQ.opts.forEach((text, i) => {
+    const btn = document.createElement('button');
+    let cls = 'q-opt';
+    let inner = `<span class="letter">${letters[i]}</span><span class="label">${text}</span>`;
+    if (answered) {
+      cls += ' done';
+      if (i === todayQ.correct && i === picked) { cls += ' correct'; inner += `<span class="badge" style="color:var(--green);font-weight:600">✓ your answer</span>`; }
+      else if (i === todayQ.correct) { cls += ' correct'; inner += `<span class="badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--green)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>`; }
+      else if (i === picked) { cls += ' wrong'; inner += `<span class="badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="var(--red)"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></span>`; }
+      else { cls += ' faded'; }
+    } else if (picked === i) { cls += ' selected'; }
+    btn.className = cls;
+    btn.innerHTML = inner;
+    if (!answered) btn.onclick = () => selectOption(i);
+    el.appendChild(btn);
+  });
+}
+
+function selectOption(i) {
+  if (answered) return;
+  picked = i;
+  clearInterval(interval);
+  renderQuizOpts();
+  setTimeout(() => document.getElementById('confOverlay').classList.add('show'), 200);
+}
+
+// ===== CONFIDENCE =====
+function pickConf(val) {
+  confidenceVal = val;
+  document.querySelectorAll('.conf-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === val));
+  document.getElementById('confSubmit').classList.add('ready');
+}
+
+function submitConf() {
+  if (!confidenceVal) return;
+  document.getElementById('confOverlay').classList.remove('show');
+  revealAnswer();
+}
+
+// ===== CROSS-SELL RENDERER =====
+function renderActivationCS(cs) {
+  return `
+    <div class="pa-activate fade-up">
+      <div class="pa-activate-icon" style="background:${cs.iconBg};font-size:20px">${cs.icon}</div>
+      <div class="pa-activate-info"><h5>${cs.name}</h5><span>${cs.desc}</span></div>
+      <button class="pa-activate-btn ${cs.btnClass}">${cs.cta}</button>
+    </div>`;
+}
+
+// ===== REVEAL ANSWER =====
+function revealAnswer() {
+  answered = true;
+  const isCorrect = picked === todayQ.correct;
+  const timeTaken = 30 - timer;
+  const banner = document.getElementById('paBanner');
+  const crossSellEl = document.getElementById('paCrossSell');
+
+  if (isCorrect) {
+    banner.innerHTML = `<div class="pa-banner win fade-up big-check"><span class="emoji">🎯</span><div><h4>Nailed it!</h4><p>Faster than ${randBetween(60,85)}% of traders · Confidence: ${confidenceVal}/5</p></div></div>`;
+    celebrate();
+    // Activation cross-sell for correct
+    crossSellEl.innerHTML = renderActivationCS(todayCorrectCS);
+    document.getElementById('paExplain').style.display = 'none';
+  } else {
+    banner.innerHTML = `<div class="pa-banner lose fade-up shake"><span class="emoji">😔</span><div><h4>Not quite!</h4><p>The correct answer was ${letters[todayQ.correct]} — ${todayQ.opts[todayQ.correct]} · Confidence: ${confidenceVal}/5</p></div></div>`;
+    // Show explanation
+    const explainEl = document.getElementById('paExplain');
+    explainEl.style.display = 'block';
+    explainEl.innerHTML = `<h5>Why ${letters[todayQ.correct]} is correct</h5><p>${todayQ.explain}</p>`;
+    // Gap CTA + activation cross-sell for wrong
+    crossSellEl.innerHTML = `
+      <div class="pa-gap-cta fade-up">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        ${todayGapCTA}
+      </div>
+      ${renderActivationCS(todayWrongCS)}`;
+  }
+
+  renderQuizOpts();
+  document.getElementById('postAnswer').classList.add('show');
+  document.getElementById('timerVal').textContent = timeTaken + 's taken';
+  document.getElementById('timerVal').style.fontWeight = '600';
+  document.getElementById('progFill').style.transition = 'none';
+  document.getElementById('cardLive').style.display = 'none';
+  document.getElementById('cardDone').style.display = 'block';
+}
+
+// ===== CELEBRATION =====
+function celebrate() {
+  const flash = document.createElement('div');
+  flash.className = 'celeb-flash';
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 600);
+  const colors = ['#7B2FC4','#00C853','#FF9100','#2979FF','#FF1744','#FFD600','#A855F7','#69F0AE'];
+  for (let j = 0; j < 50; j++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    const size = randBetween(6,12);
+    p.style.width = (Math.random()>.5 ? size*2.5 : size) + 'px';
+    p.style.height = size + 'px';
+    p.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+    p.style.background = pick(colors);
+    p.style.left = randBetween(5,95) + '%';
+    p.style.top = randBetween(-20,-5) + '%';
+    p.style.animationDelay = (Math.random()*.8) + 's';
+    p.style.animationDuration = (1.5+Math.random()*1.5) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3500);
+  }
+}
+
+// ===== TIMER =====
+function startTimer() {
+  timer = 30;
+  updateTimer();
+  document.getElementById('progFill').style.transition = 'none';
+  document.getElementById('progFill').style.width = '100%';
+  setTimeout(() => { document.getElementById('progFill').style.transition = 'width 1s linear'; }, 50);
+  interval = setInterval(() => {
+    timer--;
+    updateTimer();
+    document.getElementById('progFill').style.width = (timer/30*100) + '%';
+    if (timer <= 10) { document.getElementById('timerVal').classList.add('warn'); document.getElementById('progFill').classList.add('warn'); }
+    if (timer <= 0) {
+      clearInterval(interval);
+      if (!answered && picked === -1) {
+        picked = -1; answered = true;
+        document.getElementById('paBanner').innerHTML = `<div class="pa-banner lose fade-up"><span class="emoji">⏰</span><div><h4>Time's up!</h4><p>The correct answer was ${letters[todayQ.correct]} — ${todayQ.opts[todayQ.correct]}</p></div></div>`;
+        document.getElementById('paExplain').style.display = 'block';
+        document.getElementById('paExplain').innerHTML = `<h5>Why ${letters[todayQ.correct]} is correct</h5><p>${todayQ.explain}</p>`;
+        document.getElementById('paCrossSell').innerHTML = `
+          <div class="pa-gap-cta fade-up"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>${todayGapCTA}</div>
+          ${renderActivationCS(todayWrongCS)}`;
+        renderQuizOpts();
+        document.getElementById('postAnswer').classList.add('show');
+        document.getElementById('cardLive').style.display = 'none';
+        document.getElementById('cardDone').style.display = 'block';
+      }
+    }
+  }, 1000);
+}
+function updateTimer() { document.getElementById('timerVal').textContent = timer + 's'; }
+
+function toggleHint() { document.getElementById('hintBtn').classList.toggle('revealed'); hintUsed = true; }
+
+function insTab(t) {
+  document.querySelectorAll('.ins-tab').forEach(el => el.classList.toggle('active', el.dataset.tab === t));
+  document.querySelectorAll('.ins-panel').forEach(el => el.classList.toggle('active', el.id === 'ins-' + t));
+}
+
+function toggleInsView() {
+  const v = document.getElementById('insightsView').value;
+  document.getElementById('communityView').style.display = v === 'community' ? 'block' : 'none';
+  document.getElementById('selfView').style.display = v === 'self' ? 'block' : 'none';
+}
+
+// ===== SELF VIEW =====
+function renderSelfView() {
+  document.getElementById('selfStats').innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">Current streak</div><div class="stat-val">🔥 ${STREAK}</div><div class="stat-sub">Best: ${BEST_STREAK} days</div></div>
+    <div class="stat-card"><div class="stat-lbl">7-day accuracy</div><div class="stat-val">${ACC_7D}%</div><div class="stat-sub up">↑ ${ACC_7D - ACC_PREV_7D}% vs prev week</div></div>
+    <div class="stat-card"><div class="stat-lbl">Hints this week</div><div class="stat-val">${HINTS_THIS_WEEK}</div><div class="stat-sub up">${HINT_CHANGE}% vs last week</div></div>
+    <div class="stat-card"><div class="stat-lbl">Hint % change</div><div class="stat-val" style="font-size:18px;color:var(--green)">↓ Improving</div><div class="stat-sub">Less hints = more confidence</div></div>`;
+
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const results = ['g','g','r','g','g','g','skip'];
+  const symbols = { g:'✓', r:'✗', skip:'⏭', x:'—' };
+  document.getElementById('selfWeekly').innerHTML = `<h4>This Week</h4><div class="week-row">${days.map((d,i) => {
+    const cls = i < results.length ? results[i] : 'x';
+    return `<div class="week-day"><div class="dot ${cls}">${symbols[cls]}</div><span>${d}</span></div>`;
+  }).join('')}</div>`;
+
+  const maxCount = Math.max(...confHeatmap.map(c => c.count));
+  const heatColors = confHeatmap.map(c => {
+    const intensity = c.count / maxCount;
+    return `rgba(123,47,196,${0.15 + intensity * 0.85})`;
+  });
+  document.getElementById('selfConfMeter').innerHTML = `
+    <h4>Confidence Meter</h4>
+    <div class="conf-heatmap">${confHeatmap.map((c,i) => `
+      <div class="conf-heatmap-cell" style="background:${heatColors[i]}">
+        <div class="num">${c.val}</div>
+        <div class="count">${c.count}x</div>
+      </div>`).join('')}
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="conf-meter-avg"><div class="big">${confAvg}</div><div class="of">/ 5 avg</div></div>
+      <div class="conf-tag ${confTagClass}">${confTag === 'Confident' ? '✓' : confTag === 'Overconfident' ? '⚠' : '↓'} ${confTag}</div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">${
+      confTag === 'Confident' ? 'Your confidence aligns with your accuracy. Keep it up!' :
+      confTag === 'Overconfident' ? 'You rate high confidence but miss more than expected. Slow down.' :
+      'You\'re getting answers right but rating yourself low. Trust your knowledge more!'
+    }</div>`;
+
+  document.getElementById('selfSpeedStats').innerHTML = `
+    <div class="stat-card"><div class="stat-lbl">Your avg speed</div><div class="stat-val">${AVG_SPEED}s</div><div class="stat-sub up">Top ${100-Math.round(AVG_SPEED/GLOBAL_AVG_SPEED*100)}%</div></div>
+    <div class="stat-card"><div class="stat-lbl">Global avg speed</div><div class="stat-val">${GLOBAL_AVG_SPEED}s</div><div class="stat-sub">All traders</div></div>`;
+
+  document.getElementById('selfSkillmap').innerHTML = `<h4>Skill Map</h4>${skillMapData.map(s => {
+    const color = s.pct >= 70 ? 'var(--green)' : s.pct >= 50 ? 'var(--orange)' : 'var(--red)';
+    return `<div class="sk-row"><span class="sk-name">${s.name}</span><div class="sk-track"><div class="sk-fill" style="width:${s.pct}%;background:${color}"></div></div><span class="sk-pct">${s.pct}%</span></div>`;
+  }).join('')}`;
+}
+
+// ===== COMMUNITY =====
+function commNav(dir) {
+  commIdx = Math.max(0, Math.min(todayCommunity.length-1, commIdx + dir));
+  renderCommQ();
+}
+
+function renderCommQ() {
+  const q = todayCommunity[commIdx];
+  if (!q) return;
+  const headerEl = document.getElementById('commQHeader');
+  let imgHtml = '';
+  if (q.image && imageGenerators[q.image]) {
+    imgHtml = `<div class="comm-q-img">${imageGenerators[q.image]()}</div>`;
+  }
+  headerEl.innerHTML = `<div class="comm-q-label">${commIdx === 0 ? "Today's Question" : `${commIdx+1} days ago`}</div>${q.q}${imgHtml}`;
+
+  document.getElementById('commQLabel').textContent = `${commIdx+1} / ${todayCommunity.length}`;
+  document.getElementById('commChartTitle').textContent = `How ${q.traders} traders answered`;
+  document.getElementById('commPrev').disabled = commIdx >= todayCommunity.length-1;
+  document.getElementById('commNext').disabled = commIdx <= 0;
+
+  const optsEl = document.getElementById('commOpts');
+  optsEl.innerHTML = '';
+  q.opts.forEach((text,i) => {
+    const isCorrect = i === q.correct;
+    const btn = document.createElement('div');
+    btn.className = 'q-opt done' + (isCorrect ? ' correct' : ' faded');
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span class="label">${text}</span><span class="badge" style="font-weight:600;color:${isCorrect?'var(--green)':'var(--text3)'}">${q.pcts[i]}%</span>`;
+    optsEl.appendChild(btn);
+  });
+
+  const barsEl = document.getElementById('commBars');
+  barsEl.innerHTML = '';
+  q.pcts.forEach((p,i) => {
+    const isHi = i === q.correct;
+    barsEl.innerHTML += `<div class="bar-col"><div class="bar-wrap"><div class="bar ${isHi?'hi':'lo'}" style="height:${p}%"></div></div><div class="bar-lbl ${isHi?'hi':''}">${letters[i]}</div><div class="bar-pct ${isHi?'hi':''}">${p}%</div></div>`;
+  });
+
+  const correctPct = q.pcts[q.correct];
+  const wrongPct = 100 - correctPct;
+  let topWrong = -1, topWrongPct = 0;
+  q.pcts.forEach((p,i) => { if (i !== q.correct && p > topWrongPct) { topWrongPct = p; topWrong = i; } });
+  document.getElementById('commSummary').innerHTML = `<strong>${correctPct}% got this right</strong> · <em>${wrongPct}% missed it · top wrong: ${letters[topWrong]}</em>`;
+
+  document.getElementById('commStatsGrid').innerHTML = `
+    <div class="comm-stat"><div class="val">${q.avgTime}</div><div class="lbl">Avg time</div></div>
+    <div class="comm-stat"><div class="val">${correctPct}%</div><div class="lbl">Got it right</div></div>
+    <div class="comm-stat"><div class="val">${q.hintPct || randBetween(5,25)}%</div><div class="lbl">Used hint</div></div>`;
+}
+
+// ===== LEARNING =====
+function formatLearnDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function onLearnDateChange() {
+  const val = document.getElementById('learnDate').value;
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('learnDateLabel').textContent = val === today ? 'TODAY' : formatLearnDate(val);
+  renderLearnings();
+}
+
+function renderLearnings() {
+  const banner = document.getElementById('unreadBanner');
+  banner.textContent = `↓ ${unreadCount} new lessons since your last visit`;
+  banner.classList.remove('hidden');
+
+  const container = document.getElementById('learnCards');
+  container.innerHTML = todayLearnings.map((l, idx) => {
+    const dotColor = l.dir === 'down' ? 'red' : l.dir === 'up' ? 'green' : 'neutral';
+    return `
+    <div class="lcard fade-up" style="animation-delay:${idx*0.06}s">
+      <div class="lcard-top">
+        <div class="lcard-time"><span class="dot ${dotColor}"></span><span>TODAY · ${l.time}</span></div>
+        <button class="lcard-save" onclick="this.classList.toggle('saved')" title="Save">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        </button>
+      </div>
+      <div class="lcard-headline">${l.headline}</div>
+      <div class="lcard-section">
+        <div class="lcard-section-hdr"><div class="ic what"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div><h5>What happened</h5></div>
+        <p>${l.what}</p>
+      </div>
+      <div class="lcard-section">
+        <div class="lcard-section-hdr"><div class="ic why"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div><h5>Why it happened</h5></div>
+        <p>${l.why}</p>
+      </div>
+      <div class="lcard-learning">
+        <div class="lrn-hdr"><span>💡</span><h5>Learning</h5></div>
+        <p>${l.learning}</p>
+      </div>
+      <div class="lcard-footer">
+        <button class="learn-more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Scroll observer for unread banner — listen on window since views are inline
+  const handleScroll = () => {
+    const cards = container.querySelectorAll('.lcard');
+    if (cards.length >= unreadCount) {
+      const targetCard = cards[unreadCount - 1];
+      const rect = targetCard.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        banner.classList.add('hidden');
+        window.removeEventListener('scroll', handleScroll);
+      }
+    }
+  };
+  window.addEventListener('scroll', handleScroll);
+}
+
+// ===== COURSES =====
+function renderCourses() {
+  const container = document.getElementById('coursesContainer');
+  const gapCourses = todayCourses.filter(c => c.badge === 'gap');
+  const otherCourses = todayCourses.filter(c => c.badge !== 'gap');
+  let html = '';
+  if (gapCourses.length) {
+    html += `<div class="course-label">Based on your skill gaps</div>`;
+    html += gapCourses.map(c => renderCourseCard(c)).join('');
+  }
+  if (otherCourses.length) {
+    html += `<div class="course-label" style="margin-top:16px">Popular with F&O traders</div>`;
+    html += otherCourses.map(c => renderCourseCard(c)).join('');
+  }
+  container.innerHTML = html;
+}
+
+function renderCourseCard(c) {
+  return `<div class="course"><div class="course-ic" style="background:linear-gradient(135deg,${c.color})"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="${c.icon}"/></svg></div><div class="course-info"><h5>${c.name}</h5><span>${c.sub}</span></div><div class="c-badge ${c.badge}">${c.badge==='gap'?'Your gap':c.badge==='pop'?'Popular':'New'}</div></div>`;
+}
+
+// ===== SHARE =====
+function shareStats() {
+  const text = `🔥 My Market IQ Stats:\n📊 ${STREAK}-day streak\n🎯 ${ACC_7D}% accuracy (7-day)\n⚡ ${AVG_SPEED}s avg speed\n💪 Confidence: ${confAvg}/5 (${confTag})\n\nTest your F&O knowledge daily on Upstox!`;
+  if (navigator.share) { navigator.share({ title:'My Market IQ Stats', text }); }
+  else { navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-btn'); const orig = btn.innerHTML;
+    btn.textContent = '✓ Copied!'; setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  }); }
+}
+
+// ===== RESET (double-tap streak) =====
+let lastTap = 0;
+document.getElementById('quizStreak').addEventListener('click', () => {
+  const now = Date.now();
+  if (now - lastTap < 400) {
+    answered = false; picked = -1; confidenceVal = 0; hintUsed = false;
+    clearInterval(interval);
+    document.getElementById('postAnswer').classList.remove('show');
+    document.getElementById('paExplain').style.display = 'none';
+    document.getElementById('timerVal').classList.remove('warn');
+    document.getElementById('progFill').classList.remove('warn');
+    document.getElementById('hintBtn').classList.remove('revealed');
+    document.getElementById('cardLive').style.display = 'block';
+    document.getElementById('cardDone').style.display = 'none';
+    document.querySelectorAll('.conf-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('confSubmit').classList.remove('ready');
+    renderQuizOpts();
+    startTimer();
+  }
+  lastTap = now;
+});
+
+// ===== NEXT Q COUNTDOWN =====
+function updateNextCountdown() {
+  const now = new Date(), next = new Date(now);
+  next.setHours(24,0,0,0);
+  const diff = next - now;
+  const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+  const txt = `${h}h ${m}m`;
+  document.getElementById('homeNextTimer').textContent = txt;
+  document.getElementById('insNextTimer').textContent = 'Next question in ' + txt;
+}
+updateNextCountdown();
+setInterval(updateNextCountdown, 60000);
+
+// ===== BOOT =====
+initUI();
+renderQuizOpts();
+</script>
+</body>
+</html>

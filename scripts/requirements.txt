@@ -1,0 +1,6 @@
+requests
+websocket-client
+anthropic
+python-dotenv
+upstox-client
+protobuf
