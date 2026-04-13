@@ -652,15 +652,15 @@ const skillMapData = [
   { name:'Strategy', pct: randBetween(40,65) },
 ];
 
-// ===== PICK TODAY'S CONTENT =====
+// ===== PICK TODAY'S CONTENT (static fallback) =====
 const qIdx = getRotationIndex(questionPool.length, 'q');
-const todayQ = questionPool[qIdx];
+let todayQ = questionPool[qIdx];
 const todayCorrectCS = correctCrossSells[getRotationIndex(correctCrossSells.length, 'ccs_r')];
 const todayWrongCS = wrongCrossSells[getRotationIndex(wrongCrossSells.length, 'ccs_w')];
 const todayGapCTA = gapCTAs[getRotationIndex(gapCTAs.length, 'gap')];
 
 const lrnStart = getRotationIndex(learningPool.length, 'lrn');
-const todayLearnings = [];
+let todayLearnings = [];
 for (let i = 0; i < Math.min(5, learningPool.length); i++) todayLearnings.push(learningPool[(lrnStart + i) % learningPool.length]);
 const unreadCount = randBetween(2, 4);
 
@@ -673,6 +673,75 @@ const todayCourses = [];
 for (let i = 0; i < 5; i++) todayCourses.push(coursesPool[(courseStart + i) % coursesPool.length]);
 
 const totalTraders = (randBetween(8,12) + ',' + String(randBetween(10,99)) + ',' + String(randBetween(100,999)));
+
+// ===== LIVE DATA LOADER =====
+// Tracks whether live data has been applied
+let liveDataLoaded = false;
+
+function mapLiveQuestion(lq) {
+  // Convert response.json question format → internal questionPool format
+  const opts = ['A','B','C','D'];
+  const correctIdx = opts.indexOf(lq.correct_option);
+  const cohortTag = lq.cohort === 'FNO' ? 'F&O' : 'INTRADAY';
+  const skillLabel = {
+    'OI_AND_MARKET_STRUCTURE': 'OI & Structure',
+    'THETA_AND_EXPIRY':        'Theta & Expiry',
+    'IV_AND_VOLATILITY':       'IV & Volatility',
+    'DELTA_AND_PRICE':         'Delta & Price',
+    'STRATEGY':                'Strategy',
+  }[lq.skill] || lq.skill;
+  return {
+    topic:   `${cohortTag} · ${skillLabel}`,
+    q:       lq.question,
+    opts:    opts.map(k => lq.options[k]),
+    correct: correctIdx,
+    hint:    '',
+    explain: lq.explanation,
+    tag:     skillLabel,
+    isLive:  true,
+  };
+}
+
+async function loadLiveData() {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const res = await fetch('data-fetching/output/response.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // Only use if it's today's data
+    if (data.market_date !== today) return;
+
+    // Use the FNO question (first question) as today's live quiz question
+    if (Array.isArray(data.questions) && data.questions.length > 0) {
+      todayQ = mapLiveQuestion(data.questions[0]);
+      liveDataLoaded = true;
+    }
+
+    // Use live learnings if available
+    if (Array.isArray(data.learnings) && data.learnings.length > 0) {
+      todayLearnings = data.learnings;
+    }
+
+    // Re-render quiz if it's already visible (hasn't been answered)
+    if (!answered) {
+      document.getElementById('qTopic').textContent = todayQ.topic;
+      document.getElementById('qText').textContent = todayQ.q;
+      document.getElementById('hintText').textContent = todayQ.hint ? '— ' + todayQ.hint : '';
+      document.getElementById('hintBtn').style.display = todayQ.hint ? '' : 'none';
+      document.getElementById('qImg').style.display = 'none';
+      renderQuizOpts();
+    }
+
+    // Add live badge to homepage card subtitle
+    const sub = document.getElementById('homeTraders');
+    if (sub && liveDataLoaded) {
+      sub.innerHTML = `<span style="color:var(--green);font-weight:600">● Live data</span> · ${totalTraders} traders answered`;
+    }
+  } catch (e) {
+    // Silently fall back to static pool
+  }
+}
 
 // ===== STATE =====
 let answered = false, picked = -1, timer = 30, interval = null, commIdx = 0;
@@ -708,7 +777,12 @@ function initUI() {
 
   document.getElementById('qTopic').textContent = todayQ.topic;
   document.getElementById('qText').textContent = todayQ.q;
-  document.getElementById('hintText').textContent = '— ' + todayQ.hint;
+  if (todayQ.hint) {
+    document.getElementById('hintText').textContent = '— ' + todayQ.hint;
+    document.getElementById('hintBtn').style.display = '';
+  } else {
+    document.getElementById('hintBtn').style.display = 'none';
+  }
 
   if (todayQ.image && imageGenerators[todayQ.image]) {
     document.getElementById('qImg').innerHTML = imageGenerators[todayQ.image]();
@@ -1000,16 +1074,28 @@ function onLearnDateChange() {
 
 function renderLearnings() {
   const banner = document.getElementById('unreadBanner');
-  banner.textContent = `↓ ${unreadCount} new lessons since your last visit`;
+  if (liveDataLoaded) {
+    banner.innerHTML = `<span style="background:rgba(255,255,255,.2);padding:2px 7px;border-radius:6px;margin-right:6px;font-size:10px">LIVE</span> Real market lessons from today`;
+  } else {
+    banner.textContent = `↓ ${unreadCount} new lessons since your last visit`;
+  }
   banner.classList.remove('hidden');
 
   const container = document.getElementById('learnCards');
   container.innerHTML = todayLearnings.map((l, idx) => {
     const dotColor = l.dir === 'down' ? 'red' : l.dir === 'up' ? 'green' : 'neutral';
+    // Support both plain text (live) and HTML (static pool)
+    const whatHtml = l.what || '';
+    const whyHtml  = l.why  || '';
+    const lrnHtml  = l.learning || '';
     return `
     <div class="lcard fade-up" style="animation-delay:${idx*0.06}s">
       <div class="lcard-top">
-        <div class="lcard-time"><span class="dot ${dotColor}"></span><span>TODAY · ${l.time}</span></div>
+        <div class="lcard-time">
+          <span class="dot ${dotColor}"></span>
+          <span>TODAY · ${l.time}</span>
+          ${liveDataLoaded ? '<span style="font-size:9px;font-weight:700;color:var(--green);background:#E8F5E9;padding:1px 6px;border-radius:8px;margin-left:4px">LIVE</span>' : ''}
+        </div>
         <button class="lcard-save" onclick="this.classList.toggle('saved')" title="Save">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
         </button>
@@ -1017,15 +1103,15 @@ function renderLearnings() {
       <div class="lcard-headline">${l.headline}</div>
       <div class="lcard-section">
         <div class="lcard-section-hdr"><div class="ic what"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div><h5>What happened</h5></div>
-        <p>${l.what}</p>
+        <p>${whatHtml}</p>
       </div>
       <div class="lcard-section">
         <div class="lcard-section-hdr"><div class="ic why"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg></div><h5>Why it happened</h5></div>
-        <p>${l.why}</p>
+        <p>${whyHtml}</p>
       </div>
       <div class="lcard-learning">
         <div class="lrn-hdr"><span>💡</span><h5>Learning</h5></div>
-        <p>${l.learning}</p>
+        <p>${lrnHtml}</p>
       </div>
       <div class="lcard-footer">
         <button class="learn-more">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
@@ -1117,6 +1203,7 @@ setInterval(updateNextCountdown, 60000);
 // ===== BOOT =====
 initUI();
 renderQuizOpts();
+loadLiveData(); // async — tries to load today's live questions + learnings
 </script>
 </body>
 </html>

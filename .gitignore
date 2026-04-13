@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# LibreOffice lock files
+.~lock.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Secrets & credentials
+data-fetching/config.env
+data-fetching/output/.token_cache.json
+
+# Output / cache
+data-fetching/output/.instruments_cache.json
+
+# Office temp files
+*.xlsx~
+~$*.xlsx

@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-04-13T14:56:14.232307",
+  "market_date": "2026-04-13",
+  "provider": "claude",
+  "market_snapshot": {
+    "NIFTY_LTP": 23894.35,
+    "NIFTY_PREV_CLOSE": 23894.35,
+    "NIFTY_DAY_HIGH": 23907.4,
+    "NIFTY_DAY_LOW": 23555.6,
+    "NIFTY_DAY_OPEN": 23589.6,
+    "NIFTY_PCT_CHANGE": 0.0,
+    "NIFTY_RANGE_TODAY": 351.8,
+    "NIFTY_ATM_STRIKE": 23900,
+    "VIX_CURRENT": 20.42,
+    "VIX_PREV_CLOSE": 20.42,
+    "VIX_PCT_CHANGE": 0.0,
+    "BANKNIFTY_LTP": 55695.4,
+    "BANKNIFTY_PCT_CHANGE": 0.0,
+    "ATM_CE_PRICE": 16.95,
+    "ATM_PE_PRICE": 17.3,
+    "STRADDLE_TOTAL_PREMIUM": 34.2,
+    "OPTION_DELTA": 0.4386,
+    "ATM_GAMMA": 0.008,
+    "IV_CURRENT": 25.39,
+    "CURRENT_PCR": 1.25,
+    "MAX_PAIN_LEVEL": 23850.0,
+    "HIGHEST_CE_OI_STRIKE": 23900.0,
+    "HIGHEST_CE_OI_LAKHS": 398.0,
+    "HIGHEST_PE_OI_STRIKE": 23800.0,
+    "HIGHEST_PE_OI_LAKHS": 358.4,
+    "DAYS_TO_EXPIRY": 0,
+    "EXPIRY_DATE": "2026-04-13"
+  },
+  "questions": [
+    {
+      "cohort": "FNO",
+      "skill": "OI_AND_MARKET_STRUCTURE",
+      "question": "On expiry day, Nifty is at 23,894 with max pain at 23,850 and highest CE OI at 23,900 (398 lakh). Where is price most likely to gravitate by close?",
+      "options": {
+        "A": "Toward 23,850 \u2014 max pain pulls price lower",
+        "B": "Above 23,900 \u2014 CE OI gets blown out",
+        "C": "Stays at 23,894 \u2014 no movement on expiry",
+        "D": "Below 23,800 \u2014 PE writers exit aggressively"
+      },
+      "correct_option": "A",
+      "explanation": "Max pain is the strike where maximum options expire worthless, and market makers tend to pin price near it by expiry. With max pain at 23,850 and heavy CE resistance at 23,900, downward drift is the path of least resistance.",
+      "difficulty": "medium",
+      "id": "GEN_FNO_20260413_145537"
+    },
+    {
+      "cohort": "INTRADAY",
+      "skill": "OI_AND_MARKET_STRUCTURE",
+      "question": "Nifty recovered from 23,555 low to 23,894 on expiry day. Highest CE OI is at 23,900 (398 lakh) and PCR is 1.25. Where is price likely to stall?",
+      "options": {
+        "A": "23,900 \u2014 heavy call OI acts as ceiling",
+        "B": "23,850 \u2014 max pain pulls price down",
+        "C": "24,000 \u2014 round number magnet",
+        "D": "No resistance; high PCR is bullish"
+      },
+      "correct_option": "A",
+      "explanation": "The 23,900 strike has 398 lakh contracts in Call OI \u2014 the largest on the chain \u2014 making it a strong resistance zone where writers will defend. Despite a bullish PCR, call writers at ATM will absorb buying pressure near expiry.",
+      "difficulty": "medium",
+      "id": "GEN_INTRADAY_20260413_145547"
+    }
+  ],
+  "learnings": [
+    {
+      "time": "15:30",
+      "headline": "Nifty pinned near max pain on expiry.",
+      "what": "Nifty closed at 23,894 \u2014 just 44 points above max pain of 23,850 \u2014 after swinging 351.8 points intraday.",
+      "why": "On expiry day, market makers and writers hold large positions near max pain. As the day progresses, delta hedging activity pulls the index toward the level where aggregate option losses are minimized.",
+      "learning": "On expiry day, watch max pain as a gravitational anchor \u2014 the index often drifts toward it in the final hour.",
+      "dir": "neutral"
+    },
+    {
+      "time": "11:15",
+      "headline": "VIX held at 20.42 despite recovery.",
+      "what": "Nifty bounced over 1,100 points from its day low of 23,555, yet VIX stayed flat at 20.42 \u2014 well above the 15\u201317 comfort zone.",
+      "why": "VIX reflects implied volatility priced into options, not just direction. Elevated VIX during a rally means traders are still buying puts as hedges, signaling that the recovery lacks conviction and tail-risk fear persists.",
+      "learning": "A rising market with high VIX is not a clean bull signal \u2014 confirm trend strength by watching VIX fall alongside price recovery.",
+      "dir": "neutral"
+    },
+    {
+      "time": "09:20",
+      "headline": "ATM straddle crushed by actual range.",
+      "what": "The ATM 23,900 straddle was priced at \u20b934.2 at open, but Nifty's actual intraday range hit 351.8 points \u2014 over 10x the premium collected.",
+      "why": "Straddle sellers profit when realized volatility stays below implied volatility. Today's gap-and-recover move caused realized vol to spike far beyond what the \u20b934.2 premium implied, resulting in losses for short straddle positions early in the session.",
+      "learning": "Never sell ATM straddles on expiry day before a major macro event \u2014 realized moves can dwarf the premium collected.",
+      "dir": "down"
+    }
+  ]
+}

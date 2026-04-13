@@ -1,0 +1,100 @@
+[
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "a1b2c3d4",
+    "q_snippet": "Today is expiry day. The 24,000 CE carries the highest Call OI at 199.3 lakh contracts, and the 23,600 PE carries the hi"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "THETA_AND_EXPIRY",
+    "q_hash": "37565de2",
+    "q_snippet": "Today is expiry day (April 13, 2026) and Nifty is trading at 23,737.25 \u2014 12.75 p"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "IV_AND_VOLATILITY",
+    "q_hash": "a9335d1c",
+    "q_snippet": "Today is expiry day (April 13, 2026). Nifty ATM strike is 23850, with ATM CE at "
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "DELTA_AND_PRICE",
+    "q_hash": "c93f3267",
+    "q_snippet": "It's expiry day (April 13, 2026). Nifty is at 23,829 and the 23,850 ATM Call has"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "STRATEGY",
+    "q_hash": "e23f1950",
+    "q_snippet": "It's expiry day (April 13, 2026). Nifty is at 23,843.55, ATM strike is 23,850. T"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "e390a31b",
+    "q_snippet": "On expiry day, the highest CE OI sits at 23900 (360.1 lakh) and highest PE OI at"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "FNO",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "653bb408",
+    "q_snippet": "On expiry day, Nifty is at 23,894 with max pain at 23,850 and highest CE OI at 2"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "e5f6a7b8",
+    "q_snippet": "Nifty opened at 23,589 on expiry day and immediately plunged to an intraday low of 23,555, triggering widespread stop-lo"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "THETA_AND_EXPIRY",
+    "q_hash": "fb54719b",
+    "q_snippet": "Today is expiry day (April 13). Nifty is at 23,737 and the 23,750 ATM CE is pric"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "IV_AND_VOLATILITY",
+    "q_hash": "b895efdf",
+    "q_snippet": "Nifty opened at 23,589 and crashed to a low of 23,555 intraday \u2014 a range of 286 "
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "DELTA_AND_PRICE",
+    "q_hash": "0cef462c",
+    "q_snippet": "Nifty opened at 23,589.60 and crashed to a low of 23,555.60 before recovering to"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "STRATEGY",
+    "q_hash": "7caa6aa8",
+    "q_snippet": "Nifty opened at 23,589, crashed to a low of 23,555 (down ~290 points from today'"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "cd87a9dd",
+    "q_snippet": "On today's expiry, Nifty opened at 23,589, fell to a low of 23,555, then recover"
+  },
+  {
+    "run_date": "2026-04-13",
+    "cohort": "INTRADAY",
+    "skill": "OI_AND_MARKET_STRUCTURE",
+    "q_hash": "04980ad1",
+    "q_snippet": "Nifty recovered from 23,555 low to 23,894 on expiry day. Highest CE OI is at 23,"
+  }
+]
