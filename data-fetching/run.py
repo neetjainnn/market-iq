@@ -591,22 +591,16 @@ if __name__ == "__main__":
     token = get_access_token()
     print(f"[auth] Token ready.\n")
 
-    # Run immediately
-    if is_market_hours() or FETCH_OOH:
-        run_fetch_cycle(token)
-    else:
-        print("[info] Outside market hours. Set FETCH_OUTSIDE_HOURS=yes in config.env to run anytime.")
-        print("[info] Scheduler is running — will auto-fetch every hour during market hours.\n")
+    # Run immediately on startup
+    run_fetch_cycle(token)
 
     def scheduled_run():
-        if is_market_hours() or FETCH_OOH:
-            t = load_token() or token
-            run_fetch_cycle(t)
-        else:
-            print(f"[{datetime.now().strftime('%H:%M')}] Outside market hours — skipping.")
+        t = load_token() or token
+        run_fetch_cycle(t)
 
-    schedule.every(FETCH_INTERVAL).minutes.do(scheduled_run)
-    print(f"[scheduler] Runs every {FETCH_INTERVAL} min. Ctrl+C to stop.\n")
+    schedule.every().day.at("13:00").do(scheduled_run)
+    schedule.every().day.at("15:45").do(scheduled_run)
+    print(f"[scheduler] Scheduled runs at 13:00 and 15:45 daily. Ctrl+C to stop.\n")
     while True:
         schedule.run_pending()
         time.sleep(30)
