@@ -97,21 +97,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg2);color:va
 .q-opt.wrong{border-color:var(--red);background:#FFEBEE}.q-opt.wrong .letter{background:var(--red);color:#fff}
 .q-opt.faded{opacity:.45}
 
-/* ===== CONFIDENCE MODAL ===== */
-.conf-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-end;justify-content:center;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-.conf-overlay.show{display:flex}
-.conf-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:24px 20px 32px;animation:slideUp .3s ease}
-.conf-pill{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
-.conf-title{font-size:17px;font-weight:800;text-align:center;margin-bottom:4px}
-.conf-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px}
-.conf-scale{display:flex;gap:10px;justify-content:center;margin-bottom:8px}
-.conf-btn{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--bg);font-size:18px;font-weight:800;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;font-family:inherit}
-.conf-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg)}
-.conf-btn.active{border-color:var(--purple);background:var(--purple);color:#fff;transform:scale(1.1)}
-.conf-labels{display:flex;justify-content:space-between;padding:0 8px;margin-bottom:20px}
-.conf-labels span{font-size:10px;color:var(--text3);font-weight:500}
-.conf-submit{width:100%;padding:14px;background:var(--purple);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;opacity:.4;pointer-events:none;transition:all .2s}
-.conf-submit.ready{opacity:1;pointer-events:auto}
 
 /* ===== POST ANSWER ===== */
 .post-answer{padding:16px;display:none}
@@ -171,17 +156,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg2);color:va
 .week-day .dot.g{background:var(--green)}.week-day .dot.r{background:var(--red)}.week-day .dot.skip{background:var(--orange)}.week-day .dot.x{background:#D1D5DB;color:#9CA3AF}
 .week-day span{font-size:10px;color:var(--text3);font-weight:500}
 
-/* Confidence meter heatmap */
-.conf-meter{background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:14px}
-.conf-meter h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-.conf-heatmap{display:flex;gap:6px;margin-bottom:10px}
-.conf-heatmap-cell{flex:1;text-align:center;padding:10px 0;border-radius:10px;position:relative}
-.conf-heatmap-cell .num{font-size:18px;font-weight:800;color:#fff}
-.conf-heatmap-cell .count{font-size:9px;font-weight:600;color:rgba(255,255,255,.8);margin-top:1px}
-.conf-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700}
-.conf-tag.confident{background:var(--green-lt);color:var(--green)}
-.conf-tag.overconfident{background:#FFF3E0;color:var(--orange)}
-.conf-tag.underconfident{background:var(--red-lt);color:var(--red)}
 .conf-meter-avg{display:flex;align-items:center;gap:8px;margin-top:10px}
 .conf-meter-avg .big{font-size:28px;font-weight:900;color:var(--purple)}
 .conf-meter-avg .of{font-size:13px;color:var(--text3);font-weight:500}
@@ -388,23 +362,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg2);color:va
   <div class="bspacer"></div>
 </div>
 
-<!-- ==================== CONFIDENCE MODAL ==================== -->
-<div class="conf-overlay" id="confOverlay">
-  <div class="conf-sheet">
-    <div class="conf-pill"></div>
-    <div class="conf-title">How confident are you?</div>
-    <div class="conf-sub">Rate your confidence before we reveal the answer</div>
-    <div class="conf-scale" id="confScale">
-      <button class="conf-btn" data-val="1" onclick="pickConf(1)">1</button>
-      <button class="conf-btn" data-val="2" onclick="pickConf(2)">2</button>
-      <button class="conf-btn" data-val="3" onclick="pickConf(3)">3</button>
-      <button class="conf-btn" data-val="4" onclick="pickConf(4)">4</button>
-      <button class="conf-btn" data-val="5" onclick="pickConf(5)">5</button>
-    </div>
-    <div class="conf-labels"><span>Just guessing</span><span>Absolutely sure</span></div>
-    <button class="conf-submit" id="confSubmit" onclick="submitConf()">Reveal Answer</button>
-  </div>
-</div>
 
 <!-- ==================== INSIGHTS VIEW ==================== -->
 <div class="view" id="viewInsights">
@@ -455,7 +412,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg2);color:va
     <div id="selfView" style="display:none">
       <div class="stat-grid fade-up" id="selfStats"></div>
       <div class="weekly fade-up" id="selfWeekly"></div>
-      <div class="conf-meter fade-up" id="selfConfMeter"></div>
       <div class="stat-grid fade-up" id="selfSpeedStats"></div>
       <div class="skillmap fade-up" id="selfSkillmap"></div>
       <button class="share-btn" onclick="shareStats()">
@@ -527,22 +483,6 @@ const GLOBAL_AVG_SPEED = 14;
 const HINTS_THIS_WEEK = 2;
 const HINT_CHANGE = -40;
 
-// Confidence heatmap data
-const confHeatmap = [
-  { val:1, count: randBetween(2,5) },
-  { val:2, count: randBetween(4,8) },
-  { val:3, count: randBetween(10,15) },
-  { val:4, count: randBetween(14,18) },
-  { val:5, count: randBetween(6,10) },
-];
-const totalConfAnswers = confHeatmap.reduce((s,c) => s + c.count, 0);
-const confAvg = +(confHeatmap.reduce((s,c) => s + c.val * c.count, 0) / totalConfAnswers).toFixed(1);
-const confCorrectHighConf = randBetween(60,80);
-const confCorrectLowConf = randBetween(40,65);
-let confTag, confTagClass;
-if (confCorrectHighConf >= 60 && confCorrectLowConf >= 50) { confTag = 'Confident'; confTagClass = 'confident'; }
-else if (confCorrectHighConf < 50) { confTag = 'Overconfident'; confTagClass = 'overconfident'; }
-else { confTag = 'Underconfident'; confTagClass = 'underconfident'; }
 
 // ===== QUESTION POOL =====
 const questionPool = [
@@ -745,7 +685,7 @@ async function loadLiveData() {
 
 // ===== STATE =====
 let answered = false, picked = -1, timer = 30, interval = null, commIdx = 0;
-let confidenceVal = 0, hintUsed = false;
+let hintUsed = false;
 
 // ===== VIEW NAVIGATION (inline, not overlay) =====
 function showView(name) {
@@ -826,21 +766,9 @@ function selectOption(i) {
   picked = i;
   clearInterval(interval);
   renderQuizOpts();
-  setTimeout(() => document.getElementById('confOverlay').classList.add('show'), 200);
+  setTimeout(() => revealAnswer(), 200);
 }
 
-// ===== CONFIDENCE =====
-function pickConf(val) {
-  confidenceVal = val;
-  document.querySelectorAll('.conf-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === val));
-  document.getElementById('confSubmit').classList.add('ready');
-}
-
-function submitConf() {
-  if (!confidenceVal) return;
-  document.getElementById('confOverlay').classList.remove('show');
-  revealAnswer();
-}
 
 // ===== CROSS-SELL RENDERER =====
 function renderActivationCS(cs) {
@@ -861,13 +789,13 @@ function revealAnswer() {
   const crossSellEl = document.getElementById('paCrossSell');
 
   if (isCorrect) {
-    banner.innerHTML = `<div class="pa-banner win fade-up big-check"><span class="emoji">🎯</span><div><h4>Nailed it!</h4><p>Faster than ${randBetween(60,85)}% of traders · Confidence: ${confidenceVal}/5</p></div></div>`;
+    banner.innerHTML = `<div class="pa-banner win fade-up big-check"><span class="emoji">🎯</span><div><h4>Nailed it!</h4><p>Faster than ${randBetween(60,85)}% of traders</p></div></div>`;
     celebrate();
     // Activation cross-sell for correct
     crossSellEl.innerHTML = renderActivationCS(todayCorrectCS);
     document.getElementById('paExplain').style.display = 'none';
   } else {
-    banner.innerHTML = `<div class="pa-banner lose fade-up shake"><span class="emoji">😔</span><div><h4>Not quite!</h4><p>The correct answer was ${letters[todayQ.correct]} — ${todayQ.opts[todayQ.correct]} · Confidence: ${confidenceVal}/5</p></div></div>`;
+    banner.innerHTML = `<div class="pa-banner lose fade-up shake"><span class="emoji">😔</span><div><h4>Not quite!</h4><p>The correct answer was ${letters[todayQ.correct]} — ${todayQ.opts[todayQ.correct]}</p></div></div>`;
     // Show explanation
     const explainEl = document.getElementById('paExplain');
     explainEl.style.display = 'block';
@@ -975,28 +903,6 @@ function renderSelfView() {
     return `<div class="week-day"><div class="dot ${cls}">${symbols[cls]}</div><span>${d}</span></div>`;
   }).join('')}</div>`;
 
-  const maxCount = Math.max(...confHeatmap.map(c => c.count));
-  const heatColors = confHeatmap.map(c => {
-    const intensity = c.count / maxCount;
-    return `rgba(123,47,196,${0.15 + intensity * 0.85})`;
-  });
-  document.getElementById('selfConfMeter').innerHTML = `
-    <h4>Confidence Meter</h4>
-    <div class="conf-heatmap">${confHeatmap.map((c,i) => `
-      <div class="conf-heatmap-cell" style="background:${heatColors[i]}">
-        <div class="num">${c.val}</div>
-        <div class="count">${c.count}x</div>
-      </div>`).join('')}
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="conf-meter-avg"><div class="big">${confAvg}</div><div class="of">/ 5 avg</div></div>
-      <div class="conf-tag ${confTagClass}">${confTag === 'Confident' ? '✓' : confTag === 'Overconfident' ? '⚠' : '↓'} ${confTag}</div>
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px">${
-      confTag === 'Confident' ? 'Your confidence aligns with your accuracy. Keep it up!' :
-      confTag === 'Overconfident' ? 'You rate high confidence but miss more than expected. Slow down.' :
-      'You\'re getting answers right but rating yourself low. Trust your knowledge more!'
-    }</div>`;
 
   document.getElementById('selfSpeedStats').innerHTML = `
     <div class="stat-card"><div class="stat-lbl">Your avg speed</div><div class="stat-val">${AVG_SPEED}s</div><div class="stat-sub up">Top ${100-Math.round(AVG_SPEED/GLOBAL_AVG_SPEED*100)}%</div></div>
@@ -1157,7 +1063,7 @@ function renderCourseCard(c) {
 
 // ===== SHARE =====
 function shareStats() {
-  const text = `🔥 My Market IQ Stats:\n📊 ${STREAK}-day streak\n🎯 ${ACC_7D}% accuracy (7-day)\n⚡ ${AVG_SPEED}s avg speed\n💪 Confidence: ${confAvg}/5 (${confTag})\n\nTest your F&O knowledge daily on Upstox!`;
+  const text = `🔥 My Market IQ Stats:\n📊 ${STREAK}-day streak\n🎯 ${ACC_7D}% accuracy (7-day)\n⚡ ${AVG_SPEED}s avg speed\n\nTest your F&O knowledge daily on Upstox!`;
   if (navigator.share) { navigator.share({ title:'My Market IQ Stats', text }); }
   else { navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.share-btn'); const orig = btn.innerHTML;
@@ -1170,7 +1076,7 @@ let lastTap = 0;
 document.getElementById('quizStreak').addEventListener('click', () => {
   const now = Date.now();
   if (now - lastTap < 400) {
-    answered = false; picked = -1; confidenceVal = 0; hintUsed = false;
+    answered = false; picked = -1; hintUsed = false;
     clearInterval(interval);
     document.getElementById('postAnswer').classList.remove('show');
     document.getElementById('paExplain').style.display = 'none';
